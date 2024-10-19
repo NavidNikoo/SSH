@@ -1,6 +1,7 @@
 #https://penzilla.itch.io/hooded-protagonist
 
 import pygame
+import engine
 
 def drawText(t, x, y):
     text = font.render(t, x, y)
@@ -34,10 +35,33 @@ font = pygame.font.Font(pygame.font.get_default_font(), 24)
 #game state = playing || win || lose
 game_state = 'playing'
 
+entities = []
+
+player_state = 'idle' # or 'walking'
+
 
 #samurai
 player_image = pygame.image.load('assets/samurai_0.png')
-#players = []
+
+player_animations = {
+    'idle' : engine.Animation([
+        pygame.image.load('assets/samuraiIdle_1.png'),
+        pygame.image.load('assets/samuraiIdle_2.png'),
+        pygame.image.load('assets/samuraiIdle_3.png'),
+        pygame.image.load('assets/samuraiIdle_4.png'),
+        pygame.image.load('assets/samuraiIdle_5.png')
+    ]),
+    'walking' : engine.Animation([
+        pygame.image.load('assets/samuraiRun_1.png'),
+        pygame.image.load('assets/samuraiRun_2.png'),
+        pygame.image.load('assets/samuraiRun_3.png'),
+        pygame.image.load('assets/samuraiRun_4.png'),
+        pygame.image.load('assets/samuraiRun_5.png'),
+        pygame.image.load('assets/samuraiRun_6.png'),
+        pygame.image.load('assets/samuraiRun_7.png'),
+        pygame.image.load('assets/samuraiRun_8.png')
+    ])
+}
 
 #platforms
 platforms = [
@@ -49,11 +73,19 @@ platforms = [
 #food image
 food_image = pygame.image.load('assets/86_roastedchicken_dish.png')
 food_image1 = pygame.image.load('assets/15_burger.png')
+
 food = [
     pygame.Rect(200, 250, 32, 32),
     pygame.Rect(250, 250, 32, 32)
 ]
 
+food1 = engine.Entity()
+food1.position = engine.Position(200, 250, 32, 32)
+
+food2 = engine.Entity()
+food2.position = engine.Position(250, 250, 32, 32)
+
+#entities.append()
 
 enemy_image = pygame.image.load('assets/hoodlum_1.png')
 enemies = [
@@ -108,16 +140,24 @@ while isRunning:
         if keys[pygame.K_a]: #left
             new_player_x -= 2
             player_direction = 'left'
+            player_state = 'walking'
         if keys[pygame.K_d]: #right
             new_player_x += 2
             player_direction = 'right'
+            player_state = 'walking'
+        if not keys[pygame.K_a] and not keys[pygame.K_d]:
+            player_state = 'idle'
         if keys[pygame.K_w] and player_on_ground: #up if on ground
             player_speed = -5
+
 
 
 #####################################################################
     #UPDATE CODE
     if game_state == 'playing':
+
+        #update player animations
+        player_animations[player_state].update()
 
         new_player_rect = pygame.Rect(new_player_x, player_y, player_width, player_height)
         x_collision = False
@@ -176,14 +216,11 @@ while isRunning:
                 food.remove(meal)
                 health += 20
 
-        print(health)
 
 #####################################################################
     #DRAWING CODE
 
     screen.fill(DARK_GRAY) #background
-
-
 
     #platform
     for p in platforms:
@@ -200,9 +237,10 @@ while isRunning:
 
     # player
     if player_direction == 'right':
-        screen.blit(player_image, (player_x, player_y))
+        #screen.blit(player_image, (player_x, player_y))
+        player_animations[player_state].draw(screen, player_x, player_y, False, False)
     elif player_direction == 'left':
-        screen.blit(pygame.transform.flip(player_image, True, False), (player_x, player_y))
+        player_animations[player_state].draw(screen, player_x, player_y, True, False)
 
     #player information display
     drawText('Health: ' + str(health), 10, 10)
