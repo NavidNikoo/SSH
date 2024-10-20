@@ -17,12 +17,12 @@ class Animation():
         self.imageList = imageList
         self.imageIndex = 0
         self.animationTimer = 0
-        self.animationSpeed = 10
+        self.animationSpeed = 7
     def update(self):
         #increment time
         self.animationTimer += 1
         #if timer gets too high..
-        if self.animationTimer >+ self.animationSpeed:
+        if self.animationTimer >= self.animationSpeed:
             self.animationTimer = 0 #reset timer
             self.imageIndex += 1 #increment the current img
             if self.imageIndex > len(self.imageList) - 1:
@@ -36,7 +36,8 @@ class Entity:
         self.state = 'idle'
         self.type = 'normal'
         self.position = None
-        self.animations = None
+        self.animations = Animations()
+        self.direction = 'right'
 
 
 

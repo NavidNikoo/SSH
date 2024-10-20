@@ -2,6 +2,7 @@
 
 import pygame
 import engine
+import utils
 
 def drawText(t, x, y):
     text = font.render(t, x, y)
@@ -37,32 +38,6 @@ game_state = 'playing'
 
 entities = []
 
-player_state = 'idle' # or 'walking'
-
-
-#samurai
-player_image = pygame.image.load('assets/samurai_0.png')
-
-player_animations = {
-    'idle' : engine.Animation([
-        pygame.image.load('assets/samuraiIdle_1.png'),
-        pygame.image.load('assets/samuraiIdle_2.png'),
-        pygame.image.load('assets/samuraiIdle_3.png'),
-        pygame.image.load('assets/samuraiIdle_4.png'),
-        pygame.image.load('assets/samuraiIdle_5.png')
-    ]),
-    'walking' : engine.Animation([
-        pygame.image.load('assets/samuraiRun_1.png'),
-        pygame.image.load('assets/samuraiRun_2.png'),
-        pygame.image.load('assets/samuraiRun_3.png'),
-        pygame.image.load('assets/samuraiRun_4.png'),
-        pygame.image.load('assets/samuraiRun_5.png'),
-        pygame.image.load('assets/samuraiRun_6.png'),
-        pygame.image.load('assets/samuraiRun_7.png'),
-        pygame.image.load('assets/samuraiRun_8.png')
-    ])
-}
-
 #platforms
 platforms = [
     pygame.Rect(100, 300, 400, 50),
@@ -70,54 +45,29 @@ platforms = [
     pygame.Rect(450, 250, 50, 50)
 ]
 
-#food image
-food_image = pygame.image.load('assets/86_roastedchicken_dish.png')
-food_image1 = pygame.image.load('assets/15_burger.png')
+#food
+entities.append(utils.makeChicken(350, 250))
+entities.append(utils.makeSushi(250, 250))
+entities.append(utils.makeBurger(125, 200))
+entities.append(utils.makeStrawberryCake(200, 250))
+entities.append(utils.makeTaco(400, 250))
 
-food = [
-    pygame.Rect(200, 250, 32, 32),
-    pygame.Rect(250, 250, 32, 32)
-]
+#enemies
+entities.append(utils.makeEnemy(150, 268))
 
-food1 = engine.Entity()
-food1.position = engine.Position(200, 250, 32, 32)
+#players
+player = utils.makePlayer(300, 0)
+entities.append(player)
 
-food2 = engine.Entity()
-food2.position = engine.Position(250, 250, 32, 32)
 
-#entities.append()
-
-enemy_image = pygame.image.load('assets/hoodlum_1.png')
-enemies = [
-    pygame.Rect(150,268, 32, 32)
-
-]
-
-lives = 3
 heart_image = pygame.image.load('assets/heart.png')
-hearts = [
-
-]
-
-health = 200
+hearts = []
 
 isRunning = True
-player_x = 300
-player_y = 0
-
-player_width = 22
-player_height = 35
-
-SPAWN_X = 200
-SPAWN_Y = 0
-
-new_player_x = player_x
-new_player_y = player_y
-
 player_speed = 0
 player_acceleration = .2
-
-player_direction = 'right'
+lives = 3
+health = 200
 
 #game loop
 while isRunning:
@@ -132,21 +82,21 @@ while isRunning:
     # horizontal movement
     if game_state == 'playing':
 
-        new_player_x = player_x
-        new_player_y = player_y
+        new_player_x = player.position.rect.x
+        new_player_y = player.position.rect.y
 
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]: #left
             new_player_x -= 2
-            player_direction = 'left'
-            player_state = 'walking'
+            player.direction = 'left'
+            player.state = 'walking'
         if keys[pygame.K_d]: #right
             new_player_x += 2
-            player_direction = 'right'
-            player_state = 'walking'
+            player.direction = 'right'
+            player.state = 'walking'
         if not keys[pygame.K_a] and not keys[pygame.K_d]:
-            player_state = 'idle'
+            player.state = 'idle'
         if keys[pygame.K_w] and player_on_ground: #up if on ground
             player_speed = -5
 
@@ -156,10 +106,10 @@ while isRunning:
     #UPDATE CODE
     if game_state == 'playing':
 
-        #update player animations
-        player_animations[player_state].update()
+        for entity in entities:
+            entity.animations.animationList[entity.state].update()
 
-        new_player_rect = pygame.Rect(new_player_x, player_y, player_width, player_height)
+        new_player_rect = pygame.Rect(new_player_x, player.position.rect.y, player.position.rect.width, player.position.rect.height)
         x_collision = False
 
         #check against every platform
@@ -169,7 +119,7 @@ while isRunning:
                 break
 
         if x_collision == False:
-            player_x = new_player_x
+            player.position.rect.x = new_player_x
 
         #vertical movement
 
@@ -177,7 +127,7 @@ while isRunning:
         new_player_y += player_speed
 
 
-        new_player_rect = pygame.Rect(player_x, new_player_y, player_width, player_height)
+        new_player_rect = pygame.Rect(player.position.rect.x, new_player_y, player.position.rect.width, player.position.rect.height)
         y_collision = False
         player_on_ground = False
 
@@ -188,34 +138,35 @@ while isRunning:
                 y_collision = True
                 player_speed = 0
                 if p[1] > new_player_y: #check if the width is greater than the player
-                    player_y = p[1] - player_height #stick player to platform
+                    player.position.rect.y = p[1] - player.position.rect.height #stick player to platform
                     player_on_ground = True
                 break
 
         if y_collision == False:
-            player_y = new_player_y
+            player.position.rect.y = new_player_y
 
+        # check against enemy and player collision
+        player_rect = pygame.Rect(player.position.rect.x, player.position.rect.y, player.position.rect.width, player.position.rect.height)
 
-        #check against enemy and player collision
-        player_rect = pygame.Rect(player_x, player_y, player_width, player_height)
-        for enemy in enemies:
-            if enemy.colliderect(player_rect):
-                lives -=1
-                #reset player position
-                player_x = SPAWN_X
-                player_y = SPAWN_Y
-                player_speed = 0
-                #change the game state if no live remaining
-                if lives <= 0:
-                    game_state = 'lose'
+        #collection system
+        for entity in entities:
+            if entity.type == 'collectable':
+                if entity.position.rect.colliderect(player_rect):
+                    entities.remove(entity)
+                    health += 20
+                if health <= 0:
+                    lives -= 1
 
-        #see if any food has been eaten
-        player_rect = pygame.Rect(player_x, player_y, player_width, player_height)
-        for meal in food:
-            if meal.colliderect(player_rect):
-                food.remove(meal)
-                health += 20
-
+        #enemy system
+        for entity in entities:
+            if entity.type == 'dangerous':
+                if entity.position.rect.colliderect(player_rect):
+                    lives -= 1
+                    player.position.rect.x = 200
+                    player.position.rect.y = 0
+                    player_speed = 0
+                    if lives <= 0:
+                        game_state = 'lose'
 
 #####################################################################
     #DRAWING CODE
@@ -226,21 +177,14 @@ while isRunning:
     for p in platforms:
         pygame.draw.rect(screen, MUSTARD, p)
 
-    #enemies
-    for enemy in enemies:
-        screen.blit(enemy_image, (enemy.x, enemy.y))
-
-    #food
-    for meal in food:
-        screen.blit(food_image, (meal.x, meal.y))
-        screen.blit(food_image1, (meal.x, meal.y))
-
-    # player
-    if player_direction == 'right':
-        #screen.blit(player_image, (player_x, player_y))
-        player_animations[player_state].draw(screen, player_x, player_y, False, False)
-    elif player_direction == 'left':
-        player_animations[player_state].draw(screen, player_x, player_y, True, False)
+    #draw system
+    for entity in entities:
+        s = entity.state
+        a = entity.animations.animationList[s]
+        if entity.direction == 'left':
+            a.draw(screen, entity.position.rect.x, entity.position.rect.y, True, False)
+        else:
+            a.draw(screen, entity.position.rect.x, entity.position.rect.y, False, False)
 
     #player information display
     drawText('Health: ' + str(health), 10, 10)
