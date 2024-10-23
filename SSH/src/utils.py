@@ -67,8 +67,6 @@ def makeEnemy(x, y):
     entity.type = 'dangerous'
     return entity
 
-
-
 SamuraiIdle1 = pygame.image.load('assets/samuraiIdle_1.png')
 SamuraiIdle2 = pygame.image.load('assets/samuraiIdle_2.png')
 SamuraiIdle3 = pygame.image.load('assets/samuraiIdle_3.png')

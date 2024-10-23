@@ -53,12 +53,16 @@ entities.append(utils.makeStrawberryCake(200, 250))
 entities.append(utils.makeTaco(400, 250))
 
 #enemies
-entities.append(utils.makeEnemy(150, 268))
+enemy = utils.makeEnemy(150, 268)
+enemy.camera = engine.Camera(420, 10, 200, 200)
+entities.append(enemy)
 
 #players
 player = utils.makePlayer(300, 0)
+player.camera = engine.Camera(10, 10, 400, 400)
 entities.append(player)
 
+cameraSys = engine.CameraSystem()
 
 heart_image = pygame.image.load('assets/heart.png')
 hearts = []
@@ -127,7 +131,7 @@ while isRunning:
         new_player_y += player_speed
 
 
-        new_player_rect = pygame.Rect(player.position.rect.x, new_player_y, player.position.rect.width, player.position.rect.height)
+        new_player_rect = pygame.Rect(int(player.position.rect.x), int(new_player_y), player.position.rect.width, player.position.rect.height)
         y_collision = False
         player_on_ground = False
 
@@ -143,10 +147,10 @@ while isRunning:
                 break
 
         if y_collision == False:
-            player.position.rect.y = new_player_y
+            player.position.rect.y = int(new_player_y)
 
         # check against enemy and player collision
-        player_rect = pygame.Rect(player.position.rect.x, player.position.rect.y, player.position.rect.width, player.position.rect.height)
+        player_rect = pygame.Rect(int(player.position.rect.x), int(player.position.rect.y), player.position.rect.width, player.position.rect.height)
 
         #collection system
         for entity in entities:
@@ -173,34 +177,23 @@ while isRunning:
 
     screen.fill(DARK_GRAY) #background
 
-    #platform
-    for p in platforms:
-        pygame.draw.rect(screen, MUSTARD, p)
-
-    #draw system
-    for entity in entities:
-        s = entity.state
-        a = entity.animations.animationList[s]
-        if entity.direction == 'left':
-            a.draw(screen, entity.position.rect.x, entity.position.rect.y, True, False)
-        else:
-            a.draw(screen, entity.position.rect.x, entity.position.rect.y, False, False)
+    cameraSys._update(screen, entities, platforms)
 
     #player information display
-    drawText('Health: ' + str(health), 10, 10)
+    #drawText('Health: ' + str(health), 10, 10)
 
     #lives
-    for l in range(lives):
-        screen.blit(heart_image, (200 + (l * 25), 0))
+    #for l in range(lives):
+        #screen.blit(heart_image, (200 + (l * 25), 0))
 
 
-    if game_state == 'win':
-        drawText('You win!', 50, 50)
-        pass
+    #if game_state == 'win':
+#        drawText('You win!', 50, 50)
+#        pass
 
-    if game_state == 'lose':
-        drawText('You Lose!', 50, 50)
-        pass
+    #if game_state == 'lose':
+    #    drawText('You Lose!', 50, 50)
+    #    pass
 
         # present screen
     pygame.display.flip()
