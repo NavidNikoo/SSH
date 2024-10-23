@@ -55,11 +55,14 @@ entities.append(utils.makeTaco(400, 250))
 #enemies
 enemy = utils.makeEnemy(150, 268)
 enemy.camera = engine.Camera(420, 10, 200, 200)
+enemy.camera.setWorldPos(150, 250)
 entities.append(enemy)
 
 #players
 player = utils.makePlayer(300, 0)
 player.camera = engine.Camera(10, 10, 400, 400)
+player.camera.setWorldPos(300, 0)
+player.camera.trackEntity(player)
 entities.append(player)
 
 cameraSys = engine.CameraSystem()
@@ -177,7 +180,7 @@ while isRunning:
 
     screen.fill(DARK_GRAY) #background
 
-    cameraSys._update(screen, entities, platforms)
+    cameraSys.update(screen, entities, platforms)
 
     #player information display
     #drawText('Health: ' + str(health), 10, 10)
