@@ -1,4 +1,5 @@
 import pygame
+import utils
 
 class System():
     def __init__(self):
@@ -7,12 +8,12 @@ class System():
     def check(self, entity):
         return True
 
-    def update(self, screen, entities, platforms):
-        for entity in entities:
+    def update(self, screen, world):
+        for entity in world.entities:
             if self.check(entity):
-                self.updateEntity(screen, entity, entities, platforms)
+                self.updateEntity(screen, entity, world)
 
-    def updateEntity(self, screen, entity, entities, platforms):
+    def updateEntity(self, screen, entity, world):
         pass
 
 MUSTARD = (209, 206, 25)
@@ -24,7 +25,7 @@ class CameraSystem(System):
     def check(self, entity):
         return entity.camera is not None
 
-    def updateEntity(self, screen, entity, entities, platforms):
+    def updateEntity(self, screen, entity, world):
 
         #set clipping rectangle
         cameraRect = entity.camera.rect
@@ -33,8 +34,6 @@ class CameraSystem(System):
 
         #update camera if tracking an entity
         if entity.camera.entityToTrack is not None:
-
-
 
             trackedEntity = entity.camera.entityToTrack
 
@@ -47,22 +46,41 @@ class CameraSystem(System):
             entity.camera.worldX = (currentX * .98) + (targetX * 0.02)
             entity.camera.worldY = (currentY * .98) + (targetY * 0.02)
 
-            #calculate offsets
-        offsetX = cameraRect.x + cameraRect.w/2 - entity.camera.worldX
-        offsetY = cameraRect.y + cameraRect.h/2 - entity.camera.worldY
+        #calculate offsets
+        offsetX = cameraRect.x + cameraRect.w/2 - (entity.camera.worldX *  entity.camera.zoomLevel)
+        offsetY = cameraRect.y + cameraRect.h/2 - (entity.camera.worldY *  entity.camera.zoomLevel)
 
         screen.fill(BLACK)
 
         #render platforms
-        for p in platforms:
-            newPosRect = pygame.Rect(p.x + offsetX, p.y + offsetY, p.w, p.h)
+        for p in world.platforms:
+            newPosRect = pygame.Rect(
+                (p.x *  entity.camera.zoomLevel) + offsetX,
+                (p.y *  entity.camera.zoomLevel) + offsetY,
+                p.w *  entity.camera.zoomLevel,
+                p.h *  entity.camera.zoomLevel)
             pygame.draw.rect(screen, MUSTARD, newPosRect)
 
         # render entities
-        for e in entities:
+        for e in world.entities:
             s = e.state
             a = e.animations.animationList[s]
-            a.draw(screen, e.position.rect.x + offsetX, e.position.rect.y + offsetY, e.direction == 'left', False)
+            a.draw(screen,
+                   (e.position.rect.x * entity.camera.zoomLevel) + offsetX,
+                   (e.position.rect.y * entity.camera.zoomLevel) + offsetY,
+                   e.direction == 'left',
+                   False,
+                   entity.camera.zoomLevel)
+
+        # entity HUD
+        # player health display
+        if entity.health is not None:
+            utils.drawText(screen, 'Health: ' + str(entity.health.health), entity.camera.rect.x + 10, entity.camera.rect.x + 50)
+
+        # lives
+        if entity.battle is not None:
+            for l in range(entity.battle.lives):
+                screen.blit(utils.heart_image, (entity.camera.rect.x + 0 + (l * 25), entity.camera.rect.y + 0))
 
 
         screen.set_clip(None)
@@ -73,6 +91,7 @@ class Camera():
         self.worldX = 0
         self.worldY = 0
         self.entityToTrack = None
+        self.zoomLevel = 1
 
     def setWorldPos(self, x, y):
         self.worldX = x
@@ -111,8 +130,19 @@ class Animation():
             if self.imageIndex > len(self.imageList) - 1:
                 self.imageIndex = 0
                 #loop back to the first img once index gets too high
-    def draw(self, screen ,x, y, flipX, flipY):
-        screen.blit(pygame.transform.flip(self.imageList[self.imageIndex], flipX, flipY), (x, y))
+    def draw(self, screen ,x, y, flipX, flipY, zoomLevel):
+        image = self.imageList[self.imageIndex]
+        newWidth = int(image.get_rect().w * zoomLevel)
+        newHeight = int(image.get_rect().h * zoomLevel)
+        screen.blit(pygame.transform.scale(pygame.transform.flip(image, flipX, flipY), (newWidth, newHeight)), (x, y))
+
+class Health(): #score
+    def __init__(self):
+        self.health = 200
+
+class Battle():
+    def __init__(self):
+        self.lives = 3
 
 class Entity:
     def __init__(self):
@@ -122,6 +152,5 @@ class Entity:
         self.animations = Animations()
         self.direction = 'right'
         self.camera = None
-
-
-
+        self.health = None
+        self.battle = None

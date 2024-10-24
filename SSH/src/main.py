@@ -3,12 +3,7 @@
 import pygame
 import engine
 import utils
-
-def drawText(t, x, y):
-    text = font.render(t, x, y)
-    text_rectangle = text.get_rect()
-    text_rectangle.topleft = (x, y)
-    screen.blit(text, text_rectangle)
+import level
 
 # Define color constants for use in the GUI
 #For custom colors, go to color picker on google and find the tuple and use it, make it a constant if you want
@@ -31,50 +26,87 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Create the display surface
 pygame.display.set_caption("Super Smash Hombres")  # Set the window title
 clock = pygame.time.Clock()
-font = pygame.font.Font(pygame.font.get_default_font(), 24)
 
 #game state = playing || win || lose
 game_state = 'playing'
 
-entities = []
-
 #platforms
-platforms = [
-    pygame.Rect(100, 300, 400, 50),
-    pygame.Rect(100, 250, 50, 50),
-    pygame.Rect(450, 250, 50, 50)
-]
 
 #food
-entities.append(utils.makeChicken(350, 250))
-entities.append(utils.makeSushi(250, 250))
-entities.append(utils.makeBurger(125, 200))
-entities.append(utils.makeStrawberryCake(200, 250))
-entities.append(utils.makeTaco(400, 250))
+Chicken = utils.makeChicken(350, 250)
+Sushi = utils.makeSushi(250, 250)
+Burger = utils.makeBurger(125, 200)
+StrawberryCake = utils.makeStrawberryCake(200, 250)
+Taco = utils.makeTaco(400, 250)
 
 #enemies
 enemy = utils.makeEnemy(150, 268)
 enemy.camera = engine.Camera(420, 10, 200, 200)
 enemy.camera.setWorldPos(150, 250)
-entities.append(enemy)
 
-#players
+#playersx
 player = utils.makePlayer(300, 0)
 player.camera = engine.Camera(10, 10, 400, 400)
 player.camera.setWorldPos(300, 0)
 player.camera.trackEntity(player)
-entities.append(player)
+player.health = engine.Health()
+player.battle = engine.Battle()
 
 cameraSys = engine.CameraSystem()
 
-heart_image = pygame.image.load('assets/heart.png')
-hearts = []
+#lose if players have no lives remaining
+def lostLevel(level):
+
+    # level isn't lost if any player has a life left
+    for entity in level.entities:
+        if entity.type == 'player':
+              if entity.battle is not None:
+                  if entity.battle.lives > 0:
+                      return False
+
+    #level is lost otherwise
+    return True
+
+#Temp win status: win if all collectables(food) are collected, will eventually change to when there is one man left standing
+def wonLevel(level):
+    #level isn't won if any collectables are left
+    for entity in level.entities:
+        if entity.type == 'collectable':
+            return False
+
+    #otherwise level is won
+    return True
+
+level1 = level.Level(
+    platforms=[
+        pygame.Rect(100, 300, 400, 50),
+        pygame.Rect(100, 250, 50, 50),
+        pygame.Rect(450, 250, 50, 50)
+    ],
+    entities = [
+        player, enemy, Chicken, Sushi, Burger, StrawberryCake, Taco
+    ],
+    winFunc=wonLevel,
+    loseFunc=lostLevel
+)
+
+level2 = level.Level(
+    platforms=[
+        pygame.Rect(100, 300, 400, 50),
+    ],
+    entities = [
+        player, Taco
+    ],
+    winFunc=wonLevel,
+    loseFunc=lostLevel
+)
+
+#set the current level
+world = level1
 
 isRunning = True
 player_speed = 0
 player_acceleration = .2
-lives = 3
-health = 200
 
 #game loop
 while isRunning:
@@ -107,20 +139,28 @@ while isRunning:
         if keys[pygame.K_w] and player_on_ground: #up if on ground
             player_speed = -5
 
+        #control zoom level of the player camera
+        #zoom out
+        if keys[pygame.K_q]:
+            if player.camera.zoomLevel > 0:
+                player.camera.zoomLevel -= 0.01
+        if keys[pygame.K_e]:
+            player.camera.zoomLevel += 0.01
+
 
 
 #####################################################################
     #UPDATE CODE
     if game_state == 'playing':
 
-        for entity in entities:
+        for entity in world.entities:
             entity.animations.animationList[entity.state].update()
 
         new_player_rect = pygame.Rect(new_player_x, player.position.rect.y, player.position.rect.width, player.position.rect.height)
         x_collision = False
 
         #check against every platform
-        for p in platforms:
+        for p in world.platforms:
             if p.colliderect(new_player_rect):
                 x_collision = True
                 break
@@ -139,7 +179,7 @@ while isRunning:
         player_on_ground = False
 
         #check against every platform
-        for p in platforms:
+        for p in world.platforms:
             if p.colliderect(new_player_rect):
                 # set x_collision to true
                 y_collision = True
@@ -156,47 +196,35 @@ while isRunning:
         player_rect = pygame.Rect(int(player.position.rect.x), int(player.position.rect.y), player.position.rect.width, player.position.rect.height)
 
         #collection system
-        for entity in entities:
+        for entity in world.entities:
             if entity.type == 'collectable':
                 if entity.position.rect.colliderect(player_rect):
-                    entities.remove(entity)
-                    health += 20
-                if health <= 0:
-                    lives -= 1
+                    world.entities.remove(entity)
+                    player.health.health += 20
+                if player.health.health <= 0:
+                    player.battle.lives -= 1
+
 
         #enemy system
-        for entity in entities:
+        for entity in world.entities:
             if entity.type == 'dangerous':
                 if entity.position.rect.colliderect(player_rect):
-                    lives -= 1
+                    player.battle.lives -= 1
                     player.position.rect.x = 200
                     player.position.rect.y = 0
                     player_speed = 0
-                    if lives <= 0:
-                        game_state = 'lose'
+
+    if world.isWon():
+        game_state = 'win'
+    if world.isLost():
+        game_state = 'lose'
 
 #####################################################################
     #DRAWING CODE
 
     screen.fill(DARK_GRAY) #background
 
-    cameraSys.update(screen, entities, platforms)
-
-    #player information display
-    #drawText('Health: ' + str(health), 10, 10)
-
-    #lives
-    #for l in range(lives):
-        #screen.blit(heart_image, (200 + (l * 25), 0))
-
-
-    #if game_state == 'win':
-#        drawText('You win!', 50, 50)
-#        pass
-
-    #if game_state == 'lose':
-    #    drawText('You Lose!', 50, 50)
-    #    pass
+    cameraSys.update(screen, world)
 
         # present screen
     pygame.display.flip()

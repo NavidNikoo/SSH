@@ -1,12 +1,29 @@
 import pygame
 import engine
 
-Chicken = pygame.image.load('assets/86_roastedchicken_dish.png')
-Burger = pygame.image.load('assets/15_burger.png')
-StrawberryCake = pygame.image.load('assets/91_strawberrycake_dish.png')
-Taco = pygame.image.load('assets/99_taco.png')
-Sushi = pygame.image.load('assets/97_sushi.png')
+# Define color constants for use in the GUI
+#For custom colors, go to color picker on google and find the tuple and use it, make it a constant if you want
+BLACK = (0, 0, 0)
+GRAY = (127, 127, 127)
+WHITE = (250, 250, 250)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+LIGHT_GRAY = (200, 200, 200)
+DARK_GRAY = (150, 150, 150)
+MUSTARD = (209, 206, 25)
 
+pygame.font.init()
+font = pygame.font.Font(pygame.font.get_default_font(), 24)
+def drawText(screen, t, x, y):
+    text = font.render(t,True, MUSTARD, y)
+    text_rectangle = text.get_rect()
+    text_rectangle.topleft = (x, y)
+    screen.blit(text, text_rectangle)
+
+heart_image = pygame.image.load('assets/heart.png')
+
+Chicken = pygame.image.load('assets/86_roastedchicken_dish.png')
 def makeChicken(x, y):
     entity = engine.Entity()
     entity.position = engine.Position(x, y, 32, 32)
@@ -16,6 +33,8 @@ def makeChicken(x, y):
     entity.animations.add('idle', entityAnimation)
     entity.type = 'collectable'
     return entity
+
+Burger = pygame.image.load('assets/15_burger.png')
 
 def makeBurger(x, y):
     entity = engine.Entity()
@@ -27,6 +46,7 @@ def makeBurger(x, y):
     entity.type = 'collectable'
     return entity
 
+StrawberryCake = pygame.image.load('assets/91_strawberrycake_dish.png')
 def makeStrawberryCake(x, y):
     entity = engine.Entity()
     entity.position = engine.Position(x, y, 32, 32)
@@ -37,6 +57,7 @@ def makeStrawberryCake(x, y):
     entity.type = 'collectable'
     return entity
 
+Taco = pygame.image.load('assets/99_taco.png')
 def makeTaco(x, y):
     entity = engine.Entity()
     entity.position = engine.Position(x, y, 32, 32)
@@ -47,6 +68,7 @@ def makeTaco(x, y):
     entity.type = 'collectable'
     return entity
 
+Sushi = pygame.image.load('assets/97_sushi.png')
 def makeSushi(x, y):
     entity = engine.Entity()
     entity.position = engine.Position(x, y, 32, 32)
@@ -57,7 +79,6 @@ def makeSushi(x, y):
     return entity
 
 enemy0 = pygame.image.load('assets/hoodlum_1.png')
-
 def makeEnemy(x, y):
     entity = engine.Entity()
     entity.position = engine.Position(x, y, 32, 32)
