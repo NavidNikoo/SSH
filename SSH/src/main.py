@@ -4,6 +4,7 @@ import pygame
 import engine
 import utils
 import level
+import scene
 
 # Define color constants for use in the GUI
 #For custom colors, go to color picker on google and find the tuple and use it, make it a constant if you want
@@ -104,12 +105,25 @@ level2 = level.Level(
 #set the current level
 world = level1
 
+sceneManager = scene.SceneManager()
+mainMenu = scene.MainMenuScene()
+sceneManager.push(mainMenu)
+
+
 isRunning = True
 player_speed = 0
 player_acceleration = .2
 
+
 #game loop
 while isRunning:
+
+    if sceneManager.isEmpty():
+        isRunning = False
+        
+    sceneManager.input()
+    sceneManager.update()
+    sceneManager.draw()
 
     #INPUT
     for event in pygame.event.get():
