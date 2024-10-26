@@ -64,7 +64,7 @@ def wonLevel(level):
     #otherwise level is won
     return True
 
-level1 = level.Level(
+globals.levels[1] = level.Level(
     platforms=[
         pygame.Rect(100, 300, 400, 50),
         pygame.Rect(100, 250, 50, 50),
@@ -77,7 +77,7 @@ level1 = level.Level(
     loseFunc=lostLevel
 )
 
-level2 = level.Level(
+globals.levels[2] = level.Level(
     platforms=[
         pygame.Rect(100, 300, 400, 50),
     ],
@@ -89,7 +89,8 @@ level2 = level.Level(
 )
 
 #set the current level
-world = level1
+
+globals.world = globals.levels[1]
 
 sceneManager = scene.SceneManager()
 mainMenu = scene.MainMenuScene()
@@ -153,14 +154,14 @@ while isRunning:
     #UPDATE CODE
     if game_state == 'playing':
 
-        for entity in world.entities:
+        for entity in globals.world.entities:
             entity.animations.animationList[entity.state].update()
 
         new_player_rect = pygame.Rect(new_player_x, player.position.rect.y, player.position.rect.width, player.position.rect.height)
         x_collision = False
 
         #check against every platform
-        for p in world.platforms:
+        for p in globals.world.platforms:
             if p.colliderect(new_player_rect):
                 x_collision = True
                 break
@@ -179,7 +180,7 @@ while isRunning:
         player_on_ground = False
 
         #check against every platform
-        for p in world.platforms:
+        for p in globals.world.platforms:
             if p.colliderect(new_player_rect):
                 # set x_collision to true
                 y_collision = True
@@ -196,17 +197,17 @@ while isRunning:
         player_rect = pygame.Rect(int(player.position.rect.x), int(player.position.rect.y), player.position.rect.width, player.position.rect.height)
 
         #collection system
-        for entity in world.entities:
+        for entity in globals.world.entities:
             if entity.type == 'collectable':
                 if entity.position.rect.colliderect(player_rect):
-                    world.entities.remove(entity)
+                    globals.world.entities.remove(entity)
                     player.health.health += 20
                 if player.health.health <= 0:
                     player.battle.lives -= 1
 
 
         #enemy system
-        for entity in world.entities:
+        for entity in globals.world.entities:
             if entity.type == 'dangerous':
                 if entity.position.rect.colliderect(player_rect):
                     player.battle.lives -= 1
@@ -214,20 +215,7 @@ while isRunning:
                     player.position.rect.y = 0
                     player_speed = 0
 
-    if world.isWon():
-        game_state = 'win'
-    if world.isLost():
-        game_state = 'lose'
-
 #####################################################################
-    #DRAWING CODE
-
-    #screen.fill(DARK_GRAY) #background
-
-    #cameraSys.update(screen, world)
-
-    # present screen
-
 
     #lives
     clock.tick(60)

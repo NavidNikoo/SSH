@@ -1,5 +1,6 @@
 import pygame
 import utils
+import globals
 
 class System():
     def __init__(self):
@@ -8,10 +9,10 @@ class System():
     def check(self, entity):
         return True
 
-    def update(self, screen, world):
-        for entity in world.entities:
+    def update(self, screen):
+        for entity in globals.world.entities:
             if self.check(entity):
-                self.updateEntity(screen, entity, world)
+                self.updateEntity(screen, entity)
 
     def updateEntity(self, screen, entity, world):
         pass
@@ -25,7 +26,7 @@ class CameraSystem(System):
     def check(self, entity):
         return entity.camera is not None
 
-    def updateEntity(self, screen, entity, world):
+    def updateEntity(self, screen, entity):
 
         #set clipping rectangle
         cameraRect = entity.camera.rect
@@ -53,7 +54,7 @@ class CameraSystem(System):
         screen.fill(BLACK)
 
         #render platforms
-        for p in world.platforms:
+        for p in globals.world.platforms:
             newPosRect = pygame.Rect(
                 (p.x *  entity.camera.zoomLevel) + offsetX,
                 (p.y *  entity.camera.zoomLevel) + offsetY,
@@ -62,7 +63,7 @@ class CameraSystem(System):
             pygame.draw.rect(screen, MUSTARD, newPosRect)
 
         # render entities
-        for e in world.entities:
+        for e in globals.world.entities:
             s = e.state
             a = e.animations.animationList[s]
             a.draw(screen,

@@ -13,3 +13,6 @@ MUSTARD = (209, 206, 25)
 # Set screen size parameters
 SCREEN_WIDTH = 700  # Width of the application window
 SCREEN_HEIGHT = 500  # Height of the application window
+
+levels = {}
+world = None

@@ -1,6 +1,7 @@
 import pygame
 import utils
 import globals
+import engine
 
 #####################################################################
 
@@ -45,8 +46,12 @@ class LevelSelectScene(Scene):
     def input(self, sm):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_1]:
+            globals.world = globals.levels[1]
+            #set level to 1
             sm.push(FadeTransitionScene(self, GameScene()))
         if keys[pygame.K_2]:
+            #set level to 2
+            globals.world = globals.levels[2]
             sm.push(FadeTransitionScene(self, GameScene()))
         if keys[pygame.K_ESCAPE]:
             sm.pop()
@@ -64,16 +69,35 @@ class LevelSelectScene(Scene):
 
 class GameScene(Scene):
 
+    def __init__(self):
+        self.cameraSystem = engine.CameraSystem()
+
     def input(self, sm):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_q]:
             sm.pop()
             sm.push(FadeTransitionScene(self, None))
+        if globals.world.isWon():
+            sm.push(WinScene())
+        if globals.world.isLost():
+            sm.push(LoseScene())
+
+    def update(self, sm):
+        pass
+
 
 
     def draw(self, sm, screen):
         screen.fill(globals.DARK_GRAY)
+        self.cameraSystem.update(screen)
 
+#####################################################################
+
+class WinScene(Scene):
+    pass
+
+class LoseScene(Scene):
+    pass
 
 #####################################################################
 
