@@ -76,7 +76,7 @@ class CameraSystem(System):
         # entity HUD
         # player health display
         if entity.health is not None:
-            utils.drawText(screen, 'Health: ' + str(entity.health.health), entity.camera.rect.x + 10, entity.camera.rect.x + 50)
+            utils.drawText(screen, 'Health: ' + str(entity.health.health), entity.camera.rect.x + 10, entity.camera.rect.x + 50, globals.WHITE, 255)
 
         # lives
         if entity.battle is not None:

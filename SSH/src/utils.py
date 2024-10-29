@@ -15,10 +15,24 @@ MUSTARD = (209, 206, 25)
 
 pygame.font.init()
 font = pygame.font.Font(pygame.font.get_default_font(), 24)
-def drawText(screen, t, x, y):
-    text = font.render(t,True, MUSTARD, y)
+
+
+def blit_alpha(target, source, location, opacity):
+    x = location[0]
+    y = location[1]
+    temp = pygame.Surface((source.get_width(), source.get_height())).convert()
+    temp.blit(target, (-x, -y))
+    temp.blit(source, (0, 0))
+    temp.set_alpha(opacity)
+    target.blit(temp, location)
+
+def drawText(screen, t, x, y, fg, alpha):
+    text = font.render(t,True, fg)
     text_rectangle = text.get_rect()
     text_rectangle.topleft = (x, y)
+
+    blit_alpha(screen, text, (x,y ), alpha)
+
     screen.blit(text, text_rectangle)
 
 heart_image = pygame.image.load('assets/heart.png')
