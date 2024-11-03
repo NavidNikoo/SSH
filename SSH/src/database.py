@@ -1,5 +1,5 @@
 import socket
-from Crypto.Cipher import AES
+from CryptoDome.Cipher import AES
 from Crypto.Util.Padding import unpad
 
 
