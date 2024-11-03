@@ -1,7 +1,7 @@
 import socket
-from Cryptodome.Cipher import AES
-from Cryptodome.Util.Padding import pad
-from Cryptodome.Util.Padding import unpad
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
+
 
 
 
@@ -68,5 +68,5 @@ while True:
 	print("Username: " + str(decrypted_username))
 	print("Password: " + str(decrypted_password))
 
-	# Hang up the client's connection
+		# Hang up the client's connection
 	cliSock.close()

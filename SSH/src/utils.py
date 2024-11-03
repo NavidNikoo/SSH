@@ -1,4 +1,4 @@
-import pygame
+from pygame import pygame
 import engine
 
 # Define color constants for use in the GUI

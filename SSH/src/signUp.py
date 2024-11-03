@@ -1,8 +1,7 @@
 import socket
-from Cryptodome import Random
-from Cryptodome.Cipher import AES
-from Cryptodome.Util.Padding import pad
-from Cryptodome.Util.Padding import unpad
+from Crypto.Random import random
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
 
 #I Implement Command line arguments here. If there are n arguments present in command line
 #execute the code below
@@ -13,7 +12,7 @@ port = 1235
 Server_IP = "127.0.0.1"
 	
 # Set up the AES encryption class
-iv = Random.new().read(AES.block_size)
+iv = random.new().read(AES.block_size)
 encCipher = AES.new(key, AES.MODE_CBC, iv)
 
 Username = input('Username: ')
