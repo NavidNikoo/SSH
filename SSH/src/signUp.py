@@ -1,5 +1,5 @@
 import socket
-from Crypto.Random import random
+from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 
@@ -12,7 +12,7 @@ port = 1235
 Server_IP = "127.0.0.1"
 	
 # Set up the AES encryption class
-iv = random.new().read(AES.block_size)
+iv = get_random_bytes(AES.block_size)
 encCipher = AES.new(key, AES.MODE_CBC, iv)
 
 Username = input('Username: ')
@@ -44,8 +44,8 @@ password_length = len(passwordCipher)
 
 
 
-	# Send the message to the server
-cliSock.send(iv + bytes[username_length] + userNameCipher + bytes[password_length] + passwordCipher)
+# Send the message to the server
+cliSock.send(iv + username_length.to_bytes(4,'big') + userNameCipher + password_length.to_bytes(4, 'big')+ passwordCipher)
 
 
 print(userNameCipher + iv)

@@ -1,13 +1,6 @@
 import socket
-from CryptoDome.Cipher import AES
+from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
-
-
-
-
-#I Implement Command line arguments here. If there are n arguments present in command line
-#execute the code below
-
 
 # The key (must be 16 bytes)
 key = b'Sixteen byte key'
@@ -45,28 +38,25 @@ while True:
 	#Read IV
 	iv = data[:AES.block_size]
 
-	decCipher = AES.new(key, AES.MODE_ECB, iv)
+	decCipher = AES.new(key, AES.MODE_CBC, iv)
 
-	username_length = data[:AES.block_size]
-	username_start = AES.block_size + 1
+	username_length = int.from_bytes(data[AES.block_size:AES.block_size + 4], "big")
+	username_start = AES.block_size + 4
 	username_end = username_start + username_length
 	username_cipher = data[username_start:username_end]
 
-	password_length = data[:AES.block_size]
-	password_start = username_end + 1
-	password_cipher = data[password_start:password_start + password_length]
-
+	password_start = username_end + 4
+	password_length = int.from_bytes(data[username_end:password_start], "big")
+	password_end = password_start + password_length
+	password_cipher = data[password_start:password_end]
 	
-	encrypted_username = data[AES.block_size:AES.block_size*2]
-	encrypted_password = data[AES.block_size*2]
-
-
-	decrypted_username = unpad(decCipher.decrypt(encrypted_username), AES.block_size).decode()
-	decrypted_password = unpad(decCipher.decrypt(encrypted_password), AES.block_size).decode()	
+	
+	decrypted_username = unpad(decCipher.decrypt(username_cipher), AES.block_size).decode()
+	decrypted_password = unpad(decCipher.decrypt(password_cipher), AES.block_size).decode()	
 	
 
 	print("Username: " + str(decrypted_username))
 	print("Password: " + str(decrypted_password))
 
-		# Hang up the client's connection
+	# Hang up the client's connection
 	cliSock.close()
