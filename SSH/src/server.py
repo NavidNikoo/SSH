@@ -1,4 +1,5 @@
 import socket
+import sqlite3
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 
@@ -13,12 +14,20 @@ serverSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Associate the socket with the port
 serverSock.bind(('', port)) 
 
-
-# Start listening for incoming connections (we can have
-# at most 100 connections waiting to be accepted before
-# the server starts rejecting new connections)
+# Start listening for incoming connections
 serverSock.listen(4)
 
+#Create a new database
+conn = sqlite3.connect("userData.db")
+#Create a cursor to traverse the database
+cursor = conn.cursor()
+
+cursor.execute('''
+Create TABLE IF NOT EXISTS user(
+    username TEXT PRIMARY KEY,
+	password TEXT         
+)
+''')
 
 # Keep accepting connections forever
 while True:
@@ -54,9 +63,25 @@ while True:
 	decrypted_username = unpad(decCipher.decrypt(username_cipher), AES.block_size).decode()
 	decrypted_password = unpad(decCipher.decrypt(password_cipher), AES.block_size).decode()	
 	
-
 	print("Username: " + str(decrypted_username))
 	print("Password: " + str(decrypted_password))
 
+	try:
+		cursor.execute('''INSERT INTO user (username, password) VALUES (?, ?)''', (str(decrypted_username), str(decrypted_password)))
+		print("User data inserted into database :")
+		data = cursor.execute('''SELECT * FROM user''')
+		for row in data:
+			print(row)
+			conn.commit()
+
+	except sqlite3.IntegrityError:
+		print("Username already exists. Please try a different username")
+	except Exception as error:
+		print("An error occured: ", error)
+		conn.close()
+		cliSock.close()
+
 	# Hang up the client's connection
 	cliSock.close()
+	
+	
