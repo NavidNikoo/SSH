@@ -6,7 +6,7 @@ import utils
 import level
 import scene
 import globals
-
+import inputstream
 
 #init
 pygame.init()
@@ -96,6 +96,7 @@ sceneManager = scene.SceneManager()
 mainMenu = scene.MainMenuScene()
 sceneManager.push(mainMenu)
 
+inputStream = inputstream.InputStream()
 
 isRunning = True
 player_speed = 0
@@ -105,11 +106,14 @@ player_acceleration = .2
 #game loop
 while isRunning:
 
+
+    inputStream.processInput()
+
     if sceneManager.isEmpty():
         isRunning = False
 
-    sceneManager.input()
-    sceneManager.update()
+    sceneManager.input(inputStream)
+    sceneManager.update(inputStream)
     sceneManager.draw(screen)
 
     #INPUT
@@ -139,6 +143,7 @@ while isRunning:
             player.state = 'idle'
         if keys[pygame.K_w] and player_on_ground: #up if on ground
             player_speed = -5
+
 
         #control zoom level of the player camera
         #zoom out

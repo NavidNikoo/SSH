@@ -27,7 +27,7 @@ def blit_alpha(target, source, location, opacity):
     target.blit(temp, location)
 
 def drawText(screen, t, x, y, fg, alpha):
-    text = font.render(t,True, fg)
+    text = font.render(t, True, fg)
     text_rectangle = text.get_rect()
     text_rectangle.topleft = (x, y)
 
