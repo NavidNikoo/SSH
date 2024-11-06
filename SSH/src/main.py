@@ -99,7 +99,6 @@ sceneManager.push(mainMenu)
 inputStream = inputstream.InputStream()
 
 isRunning = True
-player_speed = 0
 player_acceleration = .2
 
 
@@ -142,7 +141,7 @@ while isRunning:
         if not keys[pygame.K_a] and not keys[pygame.K_d]:
             player.state = 'idle'
         if keys[pygame.K_w] and player_on_ground: #up if on ground
-            player_speed = -5
+            player.speed = -5
 
 
         #control zoom level of the player camera
@@ -176,8 +175,8 @@ while isRunning:
 
         #vertical movement
 
-        player_speed += player_acceleration
-        new_player_y += player_speed
+        player.speed += player_acceleration
+        new_player_y += player.speed
 
 
         new_player_rect = pygame.Rect(int(player.position.rect.x), int(new_player_y), player.position.rect.width, player.position.rect.height)
@@ -189,7 +188,7 @@ while isRunning:
             if p.colliderect(new_player_rect):
                 # set x_collision to true
                 y_collision = True
-                player_speed = 0
+                player.speed = 0
                 if p[1] > new_player_y: #check if the width is greater than the player
                     player.position.rect.y = p[1] - player.position.rect.height #stick player to platform
                     player_on_ground = True
@@ -201,24 +200,6 @@ while isRunning:
         # check against enemy and player collision
         player_rect = pygame.Rect(int(player.position.rect.x), int(player.position.rect.y), player.position.rect.width, player.position.rect.height)
 
-        #collection system
-        for entity in globals.world.entities:
-            if entity.type == 'collectable':
-                if entity.position.rect.colliderect(player_rect):
-                    globals.world.entities.remove(entity)
-                    player.health.health += 20
-                if player.health.health <= 0:
-                    player.battle.lives -= 1
-
-
-        #enemy system
-        for entity in globals.world.entities:
-            if entity.type == 'dangerous':
-                if entity.position.rect.colliderect(player_rect):
-                    player.battle.lives -= 1
-                    player.position.rect.x = 200
-                    player.position.rect.y = 0
-                    player_speed = 0
 
 #####################################################################
 

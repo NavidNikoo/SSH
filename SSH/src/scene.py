@@ -93,6 +93,8 @@ class GameScene(Scene):
 
     def __init__(self):
         self.cameraSystem = engine.CameraSystem()
+        self.collectionSystem = engine.CollectionSystem()
+        self.battleSystem = engine.BattleSystem()
 
     def input(self, sm, inputStream):
 
@@ -105,9 +107,8 @@ class GameScene(Scene):
             sm.push(LoseScene())
 
     def update(self, sm, inputStream):
-        pass
-
-
+        self.collectionSystem.update()
+        self.battleSystem.update()
 
     def draw(self, sm, screen):
         screen.fill(globals.DARK_GRAY)

@@ -9,19 +9,46 @@ class System():
     def check(self, entity):
         return True
 
-    def update(self, screen):
+    def update(self, screen=None):
         for entity in globals.world.entities:
             if self.check(entity):
                 self.updateEntity(screen, entity)
 
-    def updateEntity(self, screen, entity, world):
+    def updateEntity(self, screen, entity):
         pass
 
-MUSTARD = (209, 206, 25)
-BLACK = (0, 0, 0)
+class CollectionSystem(System):
+    def check(self, entity):
+        return entity.type == 'player' and entity.health is not None
+
+    def updateEntity(self, screen, entity):
+        for otherEntity in globals.world.entities:
+            if otherEntity is not entity and otherEntity.type == 'collectable':
+                if entity.position.rect.colliderect(otherEntity.position.rect):
+                    #entity.collectable.onCollide(entity, otherEntity)
+                    globals.world.entities.remove(otherEntity)
+                    entity.health.health += 20
+
+
+
+class BattleSystem(System):
+    def check(self, entity):
+        return entity.type == 'player' and entity.battle is not None
+
+    def updateEntity(self, screen, entity):
+        for otherEntity in globals.world.entities:
+            if otherEntity is not entity and otherEntity.type == 'dangerous': #change to player to hurt each other
+                if entity.position.rect.colliderect(otherEntity.position.rect):
+                    #entity.battle.onCollide(entity, otherEntity)
+                    entity.battle.lives -= 1
+                    entity.position.rect.x = 200
+                    entity.position.rect.y = 0
+                    entity.speed = 0
+
+
+
 class CameraSystem(System):
-    def __init__(self):
-        super().__init__()
+
 
     def check(self, entity):
         return entity.camera is not None
@@ -51,7 +78,7 @@ class CameraSystem(System):
         offsetX = cameraRect.x + cameraRect.w/2 - (entity.camera.worldX *  entity.camera.zoomLevel)
         offsetY = cameraRect.y + cameraRect.h/2 - (entity.camera.worldY *  entity.camera.zoomLevel)
 
-        screen.fill(BLACK)
+        screen.fill(globals.BLACK)
 
         #render platforms
         for p in globals.world.platforms:
@@ -60,7 +87,7 @@ class CameraSystem(System):
                 (p.y *  entity.camera.zoomLevel) + offsetY,
                 p.w *  entity.camera.zoomLevel,
                 p.h *  entity.camera.zoomLevel)
-            pygame.draw.rect(screen, MUSTARD, newPosRect)
+            pygame.draw.rect(screen, globals.MUSTARD, newPosRect)
 
         # render entities
         for e in globals.world.entities:
@@ -155,3 +182,4 @@ class Entity:
         self.camera = None
         self.health = None
         self.battle = None
+        self.speed = 0
