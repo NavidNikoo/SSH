@@ -95,10 +95,14 @@ class GameScene(Scene):
         self.cameraSystem = engine.CameraSystem()
         self.collectionSystem = engine.CollectionSystem()
         self.battleSystem = engine.BattleSystem()
+        self.inputSystem = engine.InputSystem()
+        self.physicsSystem = engine.PhysicsSystem()
+        self.animationSystem = engine.AnimationSystem()
+
 
     def input(self, sm, inputStream):
 
-        if inputStream.keyboard.isKeyPressed(pygame.K_q):
+        if inputStream.keyboard.isKeyPressed(pygame.K_ESCAPE):
             sm.pop()
             sm.push(FadeTransitionScene([self], []))
         if globals.world.isWon():
@@ -107,8 +111,11 @@ class GameScene(Scene):
             sm.push(LoseScene())
 
     def update(self, sm, inputStream):
+        self.inputSystem.update(inputStream=inputStream)
         self.collectionSystem.update()
         self.battleSystem.update()
+        self.physicsSystem.update()
+        self.animationSystem.update()
 
     def draw(self, sm, screen):
         screen.fill(globals.DARK_GRAY)

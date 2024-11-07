@@ -14,11 +14,6 @@ screen = pygame.display.set_mode((globals.SCREEN_WIDTH, globals.SCREEN_HEIGHT)) 
 pygame.display.set_caption("Super Smash Hombres")  # Set the window title
 clock = pygame.time.Clock()
 
-#game state = playing || win || lose
-game_state = 'playing'
-
-#platforms
-
 #food
 Chicken = utils.makeChicken(350, 250)
 Sushi = utils.makeSushi(250, 250)
@@ -38,7 +33,9 @@ player.camera.setWorldPos(300, 0)
 player.camera.trackEntity(player)
 player.health = engine.Health()
 player.battle = engine.Battle()
-
+player.input = engine.Input(pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d, pygame.K_q, pygame.K_e)
+player.intention = engine.Intention()
+player.physics = engine.PhysicsSystem()
 cameraSys = engine.CameraSystem()
 
 #lose if players have no lives remaining
@@ -99,11 +96,14 @@ sceneManager.push(mainMenu)
 inputStream = inputstream.InputStream()
 
 isRunning = True
-player_acceleration = .2
-
 
 #game loop
 while isRunning:
+
+    #check for quit
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            isRunning = False
 
 
     inputStream.processInput()
@@ -114,94 +114,6 @@ while isRunning:
     sceneManager.input(inputStream)
     sceneManager.update(inputStream)
     sceneManager.draw(screen)
-
-    #INPUT
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            isRunning = False
-
-#####################################################################
-    #player input
-    # horizontal movement
-    if game_state == 'playing':
-
-        new_player_x = player.position.rect.x
-        new_player_y = player.position.rect.y
-
-        keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_a]: #left
-            new_player_x -= 2
-            player.direction = 'left'
-            player.state = 'walking'
-        if keys[pygame.K_d]: #right
-            new_player_x += 2
-            player.direction = 'right'
-            player.state = 'walking'
-        if not keys[pygame.K_a] and not keys[pygame.K_d]:
-            player.state = 'idle'
-        if keys[pygame.K_w] and player_on_ground: #up if on ground
-            player.speed = -5
-
-
-        #control zoom level of the player camera
-        #zoom out
-        if keys[pygame.K_q]:
-            if player.camera.zoomLevel > 0:
-                player.camera.zoomLevel -= 0.01
-        if keys[pygame.K_e]:
-            player.camera.zoomLevel += 0.01
-
-
-
-#####################################################################
-    #UPDATE CODE
-    if game_state == 'playing':
-
-        for entity in globals.world.entities:
-            entity.animations.animationList[entity.state].update()
-
-        new_player_rect = pygame.Rect(new_player_x, player.position.rect.y, player.position.rect.width, player.position.rect.height)
-        x_collision = False
-
-        #check against every platform
-        for p in globals.world.platforms:
-            if p.colliderect(new_player_rect):
-                x_collision = True
-                break
-
-        if x_collision == False:
-            player.position.rect.x = new_player_x
-
-        #vertical movement
-
-        player.speed += player_acceleration
-        new_player_y += player.speed
-
-
-        new_player_rect = pygame.Rect(int(player.position.rect.x), int(new_player_y), player.position.rect.width, player.position.rect.height)
-        y_collision = False
-        player_on_ground = False
-
-        #check against every platform
-        for p in globals.world.platforms:
-            if p.colliderect(new_player_rect):
-                # set x_collision to true
-                y_collision = True
-                player.speed = 0
-                if p[1] > new_player_y: #check if the width is greater than the player
-                    player.position.rect.y = p[1] - player.position.rect.height #stick player to platform
-                    player_on_ground = True
-                break
-
-        if y_collision == False:
-            player.position.rect.y = int(new_player_y)
-
-        # check against enemy and player collision
-        player_rect = pygame.Rect(int(player.position.rect.x), int(player.position.rect.y), player.position.rect.width, player.position.rect.height)
-
-
-#####################################################################
 
     #lives
     clock.tick(60)
