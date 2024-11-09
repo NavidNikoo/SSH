@@ -47,6 +47,7 @@ class PhysicsSystem(System):
             if not entity.intention.moveLeft and not entity.intention.moveRight:
                 entity.state = 'idle'
             if entity.intention.jump and entity.on_ground: #up if on ground
+                globals.soundManager.playSound('jump')
                 entity.speed = -5
 
         #horizontal movement
@@ -157,6 +158,7 @@ class CollectionSystem(System):
             if otherEntity is not entity and otherEntity.type == 'collectable':
                 if entity.position.rect.colliderect(otherEntity.position.rect):
                     #entity.collectable.onCollide(entity, otherEntity)
+                    globals.soundManager.playSound('eat')
                     globals.world.entities.remove(otherEntity)
                     entity.health.health += 20
 
@@ -327,6 +329,9 @@ class Intention:
         self.zoomIn = False
         self.zoomOut = False
 
+def resetEntity(entity):
+    pass
+
 
 class Entity:
     def __init__(self):
@@ -342,4 +347,5 @@ class Entity:
         self.input = None
         self.intention = None
         self.on_ground = False
-        self.acceleration = 0.2
+        self.acceleration = 0
+        self.reset = resetEntity

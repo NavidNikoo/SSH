@@ -3,6 +3,7 @@ import utils
 import globals
 import engine
 import UI
+import level
 #####################################################################
 
 class Scene:
@@ -31,6 +32,10 @@ class MainMenuScene(Scene):
     def __init__(self):
         self.enter = UI.ButtonUI(pygame.K_RETURN, '[Enter = next]', 50, 200)
         self.esc = UI.ButtonUI(pygame.K_ESCAPE, '[Esq = quit]', 50, 300)
+
+    def onEnter(self):
+
+        globals.soundManager.playMusicFade('menu')
 
 
     def input(self, sm, inputStream): #sm = SceneManager
@@ -69,12 +74,10 @@ class LevelSelectScene(Scene):
     def input(self, sm, inputStream):
 
         if inputStream.keyboard.isKeyPressed(pygame.K_1):
-            globals.world = globals.levels[1]
-            #set level to 1
+            level.loadLevel(1)
             sm.push(FadeTransitionScene([self], [GameScene()]))
         if inputStream.keyboard.isKeyPressed(pygame.K_2):
-            #set level to 2
-            globals.world = globals.levels[2]
+            level.loadLevel(2)
             sm.push(FadeTransitionScene([self], [GameScene()]))
         if inputStream.keyboard.isKeyPressed(pygame.K_ESCAPE):
             sm.pop()
@@ -99,6 +102,9 @@ class GameScene(Scene):
         self.physicsSystem = engine.PhysicsSystem()
         self.animationSystem = engine.AnimationSystem()
 
+
+    def onEnter(self):
+        globals.soundManager.playMusicFade('game')
 
     def input(self, sm, inputStream):
 

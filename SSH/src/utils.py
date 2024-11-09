@@ -117,6 +117,17 @@ SamuraiRun6 = pygame.image.load('assets/samuraiRun_6.png')
 SamuraiRun7 = pygame.image.load('assets/samuraiRun_7.png')
 SamuraiRun8 = pygame.image.load('assets/samuraiRun_8.png')
 
+def resetPlayer(entity):
+    entity.health.health = 200
+    entity.battle.lives = 3
+    entity.position.rect.x = 300
+    entity.position.rect.y = 0
+    entity.speed = 0
+    entity.acceleration= 0.2
+    entity.camera.setWorldPos(300, 0)
+
+
+
 def makePlayer(x, y):
     entity = engine.Entity()
     entity.position = engine.Position(x, y, 22, 35)
@@ -124,7 +135,12 @@ def makePlayer(x, y):
     entityRunAnimation = engine.Animation([SamuraiRun1, SamuraiRun2, SamuraiRun3, SamuraiRun4, SamuraiRun5, SamuraiRun6, SamuraiRun7, SamuraiRun8])
     entity.animations.add('idle', entityIdleAnimation)
     entity.animations.add('walking', entityRunAnimation)
+    entity.health = engine.Health()
+    entity.battle = engine.Battle()
+    entity.intention = engine.Intention()
+    entity.acceleration = 0.2
     entity.type = 'player'
+    entity.reset = resetPlayer
     return entity
 
 
