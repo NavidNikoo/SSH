@@ -62,7 +62,8 @@ def loadLevel(levelNumber):
                 #utils.makePowerUp('invisible' ,400, 260)
             ],
             winFunc=wonLevel,
-            loseFunc=lostLevel
+            loseFunc=lostLevel,
+
         )
 
     if levelNumber == 2:

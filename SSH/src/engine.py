@@ -1,6 +1,7 @@
 import pygame
 import utils
 import globals
+import level
 
 class System():
     def __init__(self):
@@ -294,7 +295,13 @@ class CameraSystem(System):
         offsetX = cameraRect.x + cameraRect.w/2 - (entity.camera.worldX *  entity.camera.zoomLevel)
         offsetY = cameraRect.y + cameraRect.h/2 - (entity.camera.worldY *  entity.camera.zoomLevel)
 
-        screen.fill(globals.BLACK)
+        #change backgrounds
+        background1 = pygame.image.load('assets/BG.png')
+
+        if globals.currentLevel == 1:
+            screen.blit(background1, (0,0)) #map
+        if globals.currentLevel == 2:
+            screen.fill(globals.BLUE)  # map
 
         #render platforms
         for p in globals.world.platforms:
