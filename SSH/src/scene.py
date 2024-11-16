@@ -63,11 +63,13 @@ class LevelSelectScene(Scene):
     def __init__(self):
         self.level1 = UI.ButtonUI(pygame.K_1, '[Level 1]', 50, 200)
         self.level2 = UI.ButtonUI(pygame.K_2, '[Level 2]', 50, 300)
+        self.level3 = UI.Button(pygame.K_3, '[Level 3]', 50, 400)
         self.esc = UI.ButtonUI(pygame.K_ESCAPE, '[Esq = quit]', 50, 400)
 
     def update(self, sm, inputStream):
         self.level1.update(inputStream)
         self.level2.update(inputStream)
+        self.level3.update(inputStream)
         self.esc.update(inputStream)
 
 
@@ -79,15 +81,19 @@ class LevelSelectScene(Scene):
         if inputStream.keyboard.isKeyPressed(pygame.K_2):
             level.loadLevel(2)
             sm.push(FadeTransitionScene([self], [GameScene()]))
+        if inputStream.keyboard.isKeyPressed(pygame.K_3):
+            level.loadLevel(3)
+            sm.push(FadeTransitionScene([self], [GameScene()]))
         if inputStream.keyboard.isKeyPressed(pygame.K_ESCAPE):
             sm.pop()
             sm.push(FadeTransitionScene([self], []))
 
     def draw(self, sm, screen):
         screen.fill(globals.DARK_GRAY)
-        utils.drawText(screen, 'Level Select [1/2 = Level, esc=quit]', 50, 50, globals.WHITE, 255)
+        utils.drawText(screen, 'Level Select [1/2/3 = Level, esc=quit]', 50, 50, globals.WHITE, 255)
         self.level1.draw(screen)
         self.level2.draw(screen)
+        self.level3.draw(screen)
         self.esc.draw(screen)
 
 #####################################################################
