@@ -64,7 +64,7 @@ class LevelSelectScene(Scene):
     def __init__(self):
         self.level1 = UI.ButtonUI(pygame.K_1, '[Level 1]', 50, 200)
         self.level2 = UI.ButtonUI(pygame.K_2, '[Level 2]', 50, 300)
-        self.level3 = UI.Button(pygame.K_3, '[Level 3]', 50, 400)
+        self.level3 = UI.ButtonUI(pygame.K_3, '[Level 3]', 50, 400)
         self.esc = UI.ButtonUI(pygame.K_ESCAPE, '[Esq = quit]', 50, 400)
 
     def onEnter(self):
