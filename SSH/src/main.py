@@ -78,14 +78,26 @@ globals.levels[1] = level.Level(
 )
 
 globals.levels[2] = level.Level(
+
     platforms=[
         pygame.Rect(100, 300, 400, 50),
     ],
     entities = [
-        player, Taco
+        player, enemy, Taco, Chicken, Burger
     ],
     winFunc=wonLevel,
     loseFunc=lostLevel
+)
+
+globals.levels[3] = level.level(
+    platforms=[
+        pygame.Rect(100, 300, 300, 20)
+    ],
+    entities = [
+        player, enemy, Taco, Burger, 
+    ],
+    winFunc = wonLevel,
+    loseFunc = lostLevel
 )
 
 #set the current level
