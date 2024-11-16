@@ -14,11 +14,20 @@ DARK_GRAY = (150, 150, 150)
 MUSTARD = (209, 206, 25)
 
 player1 = None
+player2 = None
+player3 = None
+player4 = None
+players = []
 
 # Set screen size parameters
-SCREEN_WIDTH = 700  # Width of the application window
-SCREEN_HEIGHT = 500  # Height of the application window
+SCREEN_WIDTH = 830  # Width of the application window
+SCREEN_HEIGHT = 830  # Height of the application window
 
 world = None
+
+maxLevel = 2
+lastCompletedLevel = 1
+currentLevel = 1
+
 
 soundManager = soundmanager.SoundManager()

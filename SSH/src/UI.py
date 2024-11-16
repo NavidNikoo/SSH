@@ -21,7 +21,6 @@ class ButtonUI:
                 self.on = False
                 self.timer = 20
 
-
     def draw(self, screen, alpha=255):
 
         if self.on:
