@@ -5,7 +5,6 @@ class Keyboard:
         self.currentKeyStates = None
         self.previousKeyStates = None
 
-
     def processInput(self):
         self.previousKeyStates = self.currentKeyStates
         self.currentKeyStates = pygame.key.get_pressed()

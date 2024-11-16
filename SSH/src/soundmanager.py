@@ -8,10 +8,15 @@ class SoundManager:
         self.musicVolume = 0.2
         self.targetMusicVolume = 0.2
         self.nextMusic = None
+        self.currentMusic = None
 
         self.sounds = {
             'jump' : pygame.mixer.Sound('sounds/jump.wav'),
             'eat': pygame.mixer.Sound('sounds/healthrefill.wav'),
+            'button' : pygame.mixer.Sound('sounds/button.wav'),
+            'characterselect' : pygame.mixer.Sound('sounds/characterselect.wav'),
+            'invis' : pygame.mixer.Sound('sounds/invis.wav')
+
         }
         self.music = {
             'game' : 'music/KleptoLindaTitles_Loopable.ogg',
@@ -20,14 +25,28 @@ class SoundManager:
     def playSound(self, soundName):
         self.sounds[soundName].set_volume(self.soundVolume)
         self.sounds[soundName].play()
+
     def playMusic(self, musicName):
+
+        #dont play music if already playing
+        if musicName is self.currentMusic:
+            return
+
         pygame.mixer.music.load(self.music[musicName])
         pygame.mixer.music.set_volume(self.musicVolume)
+        self.currentMusic = musicName
         pygame.mixer.music.play(-1)
 
     def playMusicFade(self, musicName):
+
+        #dont play music if already playing
+        if musicName is self.currentMusic:
+            return
+
         self.nextMusic = musicName
         self.fadeOut()
+
+
 
     def fadeOut(self):
         pygame.mixer.music.fadeout(500)
@@ -42,6 +61,7 @@ class SoundManager:
         if self.nextMusic is not None:
             # if old music has finished fading out
             if not pygame.mixer.music.get_busy():
+                self.currentMusic = None
                 self.musicVolume = 0
                 pygame.mixer.music.set_volume(self.musicVolume)
                 self.playMusic(self.nextMusic)

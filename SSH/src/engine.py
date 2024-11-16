@@ -17,6 +17,39 @@ class System():
     def updateEntity(self, screen, inputStream, entity):
         pass
 
+class PowerupSystem(System): #maybe make projecticle and effect
+    def check(self, entity):
+        return entity.effect is not None
+
+    #player collection of powerups
+    def updateEntity(self, screen, inputStream, entity):
+        #collection of power ups
+        for otherEntity in globals.world.entities:
+            if otherEntity is not entity and otherEntity.type == 'player' and entity.type != 'player':
+                 if entity.position.rect.colliderect(otherEntity.position.rect):
+                     #give effect component to the player
+                    otherEntity.effect = entity.effect
+                    globals.soundManager.playSound(entity.effect.sound) #switch sound and picture in utils later
+                    globals.world.entities.remove(entity)
+
+        #apply powerup effects for players
+        if entity.type == 'player':
+            entity.effect.apply(entity)
+            entity.effect.timer -= 1
+
+            #if effect has run out
+            if entity.effect.timer < 0:
+
+                #reset entity if appropriate
+                if entity.effect.end:
+                    entity.effect.end(entity)
+
+                entity.effect = None #destroy the effect
+
+
+
+
+
 class AnimationSystem(System):
     def check(self, entity):
         return entity.animations is not None
@@ -146,6 +179,13 @@ class InputSystem(System):
         else:
             entity.intention.zoomIn = False
 
+        #b2 = zoom out
+#        if inputStream.keyboard.isKeyDown(entity.input.b3):
+#            entity.intention.melee = True
+#        else:
+#            entity.intention.melee = False
+
+
         print(entity.intention.moveRight)
 
 
@@ -172,11 +212,47 @@ class BattleSystem(System):
         for otherEntity in globals.world.entities:
             if otherEntity is not entity and otherEntity.type == 'dangerous': #change to player to hurt each other
                 if entity.position.rect.colliderect(otherEntity.position.rect):
+
                     #entity.battle.onCollide(entity, otherEntity)
                     entity.battle.lives -= 1
-                    entity.position.rect.x = 200
-                    entity.position.rect.y = 0
+                    entity.position.rect.x = entity.position.initial.x
+                    entity.position.rect.y = entity.position.initial.y
                     entity.speed = 0
+
+                    #remove player if no lives left
+                    if entity.battle.lives <= 0:
+                        globals.world.entities.remove(entity)
+
+            if entity.attack_timer > 0:
+                entity.attack_timer -= globals.delta_time  # Ensure `delta_time` is in milliseconds
+
+                # Handle melee attack
+            if entity.intention.melee and entity.attack_timer <= 0:
+                entity.is_attacking = True
+                entity.attack_timer = entity.attack_cooldown  # Reset cooldown
+
+                # Create attack hitbox
+                attack_x = entity.position.rect.x + (
+                    entity.attack_range if entity.direction == 'right' else -entity.attack_range)
+                attack_y = entity.position.rect.y
+                attack_hitbox = pygame.Rect(
+                    attack_x,
+                    attack_y,
+                    entity.attack_range,
+                    entity.position.rect.height
+                )
+
+                # Check for collisions with enemies
+                for otherEntity in globals.world.entities:
+                    if otherEntity is not entity and otherEntity.type == 'dangerous':  # Replace with appropriate type
+                        if attack_hitbox.colliderect(otherEntity.position.rect):
+                            # Apply damage to the enemy
+                            otherEntity.health.health -= entity.attack_damage
+                            print(f"Hit {otherEntity} for {entity.attack_damage} damage!")
+
+                # Reset attack state
+            if entity.is_attacking:
+                entity.is_attacking = False
 
 
 
@@ -189,9 +265,9 @@ class CameraSystem(System):
     def updateEntity(self, screen, inputStream, entity):
 
         if entity.intention is not None:
-            if entity.intention.zoomIn:
+            if entity.intention.zoomIn: #b1
                 entity.camera.zoomLevel += 0.01
-            if entity.intention.zoomOut:
+            if entity.intention.zoomOut: #b2
                 if entity.camera.zoomLevel > 0:
                     entity.camera.zoomLevel -= 0.01
 
@@ -269,17 +345,16 @@ class Camera:
         self.entityToTrack = e
 
 
-
 class Position:
     def __init__(self, x, y, w, h):
         self.rect = pygame.Rect(x, y, w, h)
+        self.initial = pygame.Rect(x, y, w, h)
 
 class Animations:
     def __init__(self):
         self.animationList = {}
     def add(self, state, animation):
         self.animationList[state] = animation
-
 
 
 class Animation:
@@ -318,8 +393,11 @@ class Input:
         self.down = down
         self.left = left
         self.right = right
-        self.b1 = b1
+        self.b1 = b1 #currently zoom in and zoom out, can replace this with attacks and make b3 and b4 attacks or vice versa
         self.b2 = b2
+        #self.b3 = b3
+        #self.b3 = b3
+        #self.b4 = b4
 
 class Intention:
     def __init__(self):
@@ -328,6 +406,16 @@ class Intention:
         self.jump = False
         self.zoomIn = False
         self.zoomOut = False
+        self.melee = False
+        #self.projectile = False
+
+class Effect:
+    def __init__(self, apply, timer, sound, end):
+        self.apply = apply
+        self.timer = timer
+        self.sound = sound
+        self.end = end
+
 
 def resetEntity(entity):
     pass
@@ -349,3 +437,10 @@ class Entity:
         self.on_ground = False
         self.acceleration = 0
         self.reset = resetEntity
+        self.effect = None
+
+        self.is_attacking = False
+        self.attack_timer = 0  # Time remaining before the next attack
+        self.attack_cooldown = 500  # Cooldown time in milliseconds
+        self.attack_damage = 10
+        self.attack_range = 50

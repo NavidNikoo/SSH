@@ -1,4 +1,5 @@
 import pygame
+import globals
 import engine
 
 # Define color constants for use in the GUI
@@ -34,6 +35,57 @@ def drawText(screen, t, x, y, fg, alpha):
     blit_alpha(screen, text, (x,y ), alpha)
 
     screen.blit(text, text_rectangle)
+
+
+def setHealth(entity):
+    if entity.battle:
+        entity.battle.lives = 3
+
+def setInvisible(entity):
+    if entity.animations:
+        entity.animations.alpha = 50
+
+def endInvisible(entity):
+    if entity.animations:
+        entity.animations.alpha = 255
+
+powerupImages =  {
+    'health' : [pygame.image.load('assets/81_pizza.png')], #life reset to 3, change from pizza to something else later
+    'invisible' : [pygame.image.load('assets/invisPotion.png')]
+}
+
+powerupSounds = {
+    'health' : 'eat',
+    'invisible' : 'invis'
+}
+
+powerupApply = {
+    'health' : setHealth,
+    'invisible' : setInvisible
+
+}
+
+powerupEnd = {
+    'health' : None,
+    'invisible' : endInvisible
+}
+
+powerupEffectTimer = {
+    'health' : 0,
+    'invisible' : 200
+}
+
+def makePowerUp(type, x, y): #more like make effect, will eventually change food systems
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 40, 40)
+    entityAnimation = engine.Animation([powerupImages[type]])
+    entity.animations.add('idle', entityAnimation)
+    entity.effect = engine.Effect(powerupApply[type],
+                                  powerupEffectTimer[type],
+                                  powerupSounds[type],
+                                  powerupEnd[type])
+    return entity
+
 
 heart_image = pygame.image.load('assets/heart.png')
 
@@ -102,12 +154,18 @@ def makeEnemy(x, y):
     entity.type = 'dangerous'
     return entity
 
+#level select
+samuraiPlaying = pygame.image.load('assets/samuraiPlaying.png')
+samuraiNotPlaying = pygame.image.load('assets/samuraiNotPlaying.png')
+
+#Idle
 SamuraiIdle1 = pygame.image.load('assets/samuraiIdle_1.png')
 SamuraiIdle2 = pygame.image.load('assets/samuraiIdle_2.png')
 SamuraiIdle3 = pygame.image.load('assets/samuraiIdle_3.png')
 SamuraiIdle4 = pygame.image.load('assets/samuraiIdle_4.png')
 SamuraiIdle5 = pygame.image.load('assets/samuraiIdle_5.png')
 
+#Run
 SamuraiRun1 = pygame.image.load('assets/samuraiRun_1.png')
 SamuraiRun2 = pygame.image.load('assets/samuraiRun_2.png')
 SamuraiRun3 = pygame.image.load('assets/samuraiRun_3.png')
@@ -117,22 +175,75 @@ SamuraiRun6 = pygame.image.load('assets/samuraiRun_6.png')
 SamuraiRun7 = pygame.image.load('assets/samuraiRun_7.png')
 SamuraiRun8 = pygame.image.load('assets/samuraiRun_8.png')
 
+#Samurai
+
+
+def setPlayerCameras():
+
+    #1 player game
+    if len(globals.players) == 1:
+
+        p = globals.players[0]
+        p.camera = engine.Camera(10, 10, 810, 810)
+        p.camera.setWorldPos(p.position.initial.x, p.position.initial.y)
+        p.camera.trackEntity(p)
+
+    #2 player game
+    if len(globals.players) == 2:
+
+        p1 = globals.players[0]
+        p1.camera = engine.Camera(10, 10, 400, 810)
+        p1.camera.setWorldPos(p1.position.initial.x, p1.position.initial.y)
+        p1.camera.trackEntity(p1)
+
+        p2 = globals.players[1]
+        p2.camera = engine.Camera(420, 10, 400, 810)
+        p2.camera.setWorldPos(p2.position.initial.x, p2.position.initial.y)
+        p2.camera.trackEntity(p2)
+
+    #3 or 4 player game
+    if len(globals.players) >= 3:
+
+        p1 = globals.players[0]
+        p1.camera = engine.Camera(10, 10, 400, 400)
+        p1.camera.setWorldPos(p1.position.initial.x, p1.position.initial.y)
+        p1.camera.trackEntity(p1)
+
+        p2 = globals.players[1]
+        p2.camera = engine.Camera(420, 10, 400, 400)
+        p2.camera.setWorldPos(p2.position.initial.x, p2.position.initial.y)
+        p2.camera.trackEntity(p2)
+
+        p3 = globals.players[2]
+        p3.camera = engine.Camera(10, 420, 400, 400)
+        p3.camera.setWorldPos(p3.position.initial.x, p3.position.initial.y)
+        p3.camera.trackEntity(p3)
+
+        if len(globals.players) == 4:
+            p4 = globals.players[3]
+            p4.camera = engine.Camera(420, 420, 400, 400)
+            p4.camera.setWorldPos(p4.position.initial.x, p4.position.initial.y)
+            p4.camera.trackEntity(p4)
+
+
 def resetPlayer(entity):
     entity.health.health = 200
     entity.battle.lives = 3
-    entity.position.rect.x = 300
-    entity.position.rect.y = 0
+    entity.position.rect.x = entity.position.initial.x
+    entity.position.rect.y = entity.position.initial.y
     entity.speed = 0
     entity.acceleration= 0.2
-    entity.camera.setWorldPos(300, 0)
+    entity.camera.setWorldPos(entity.position.initial.x, entity.position.initial.y)
+    entity.direction = 'right'
+    entity.animations.alpha = 255
+    entity.effect = None
 
-
-
-def makePlayer(x, y):
+def makePlayer(x, y): #makeSamurai
     entity = engine.Entity()
     entity.position = engine.Position(x, y, 22, 35)
     entityIdleAnimation = engine.Animation([SamuraiIdle1, SamuraiIdle2, SamuraiIdle3, SamuraiIdle4, SamuraiIdle5])
     entityRunAnimation = engine.Animation([SamuraiRun1, SamuraiRun2, SamuraiRun3, SamuraiRun4, SamuraiRun5, SamuraiRun6, SamuraiRun7, SamuraiRun8])
+    entityAttackAnimation = engine.Animation([])
     entity.animations.add('idle', entityIdleAnimation)
     entity.animations.add('walking', entityRunAnimation)
     entity.health = engine.Health()
@@ -143,7 +254,7 @@ def makePlayer(x, y):
     entity.reset = resetPlayer
     return entity
 
-
+#makeSorcerer
 
 
 

@@ -44,6 +44,7 @@ def wonLevel(level):
 
 
 def loadLevel(levelNumber):
+
     if levelNumber == 1:
         globals.world = Level(
             platforms = [
@@ -58,11 +59,12 @@ def loadLevel(levelNumber):
                 utils.makeStrawberryCake(200, 250),
                 utils.makeTaco(400, 250),
                 utils.makeEnemy(150, 268),
-                globals.player1
+                #utils.makePowerUp('invisible' ,400, 260)
             ],
             winFunc=wonLevel,
             loseFunc=lostLevel
         )
+
     if levelNumber == 2:
         globals.world = Level(
             platforms=[
@@ -70,11 +72,17 @@ def loadLevel(levelNumber):
             ],
             entities=[
                 utils.makeTaco(400, 250),
-                globals.player1
             ],
             winFunc=wonLevel,
             loseFunc=lostLevel
         )
+
+
+        #level3
+
+    #add players
+    for player in globals.players:
+        globals.world.entities.append(player)
 
     #reset players
     for entity in globals.world.entities:
