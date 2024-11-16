@@ -53,6 +53,10 @@ class LevelSelectScene(Scene):
             #set level to 2
             globals.world = globals.levels[2]
             sm.push(FadeTransitionScene(self, GameScene()))
+        if keys[pygame.K_3]:
+            #set level to 3
+            globals.world = globals.levels[3]
+            sm.push(FadeTransitionScene(self, GameScene()))
         if keys[pygame.K_ESCAPE]:
             sm.pop()
             sm.push(FadeTransitionScene(self, None))
