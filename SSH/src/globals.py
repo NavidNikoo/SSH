@@ -25,7 +25,7 @@ SCREEN_HEIGHT = 830  # Height of the application window
 
 world = None
 
-maxLevel = 2
+maxLevel = 3
 lastCompletedLevel = 1
 currentLevel = 1
 

@@ -95,7 +95,6 @@ class LevelSelectScene(Scene):
         self.esc.draw(screen)
 
         #draw level select menu
-
         for levelNumber in range(1, globals.maxLevel + 1):
             c = globals.WHITE
             if levelNumber == globals.currentLevel:
@@ -189,6 +188,7 @@ class GameScene(Scene):
         self.powerupSystem = engine.PowerupSystem()
 
 
+
     def onEnter(self):
         globals.soundManager.playMusicFade('game')
 
@@ -218,6 +218,8 @@ class GameScene(Scene):
 
     def draw(self, sm, screen):
         screen.fill(globals.DARK_GRAY)
+
+        # Update cameras for rendering
         self.cameraSystem.update(screen)
 
 #####################################################################

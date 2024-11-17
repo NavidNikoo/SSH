@@ -78,8 +78,18 @@ def loadLevel(levelNumber):
             loseFunc=lostLevel
         )
 
+    if levelNumber == 3:
+        globals.world = Level(
+            platforms=[
+                pygame.Rect(100, 300, 400, 50),
+            ],
+            entities=[
+                utils.makeChicken(400, 50)
+            ],
+            winFunc=wonLevel,
+            loseFunc=lostLevel
+        )
 
-        #level3
 
     #add players
     for player in globals.players:
