@@ -258,7 +258,43 @@ class BattleSystem(System):
 
 
 class CameraSystem(System):
+    def __init__(self):
+        # Initialize necessary variables for the camera system
+        self.background_image = None  # Background image placeholder
+        self.bg_x = 0  # Horizontal position of the background
+        self.bg_speed = 1  # Background speed (you can adjust this for faster/slower scrolling)
 
+    def loadBackground(self, image_path):
+        # Load the background image for the current level
+        self.background_image = pygame.image.load(image_path)
+
+    def updateEntity(self, screen, inputStream, entity):
+        # Set the camera's clipping area
+        cameraRect = entity.camera.rect
+        clipRect = pygame.Rect(cameraRect.x, cameraRect.y, cameraRect.w, cameraRect.h)
+        screen.set_clip(clipRect)
+
+        # Scroll the background horizontally
+        self.bg_x -= self.bg_speed  # Move the background to the left
+
+        # Reset the background position once it has completely scrolled off-screen
+        if self.bg_x <= -self.background_image.get_width():
+            self.bg_x = 0
+
+        # Render the background image (scaled based on camera zoom)
+        if self.background_image:
+            scaled_background = pygame.transform.scale(
+                self.background_image, 
+                (int(self.background_image.get_width() * entity.camera.zoomLevel), 
+                 int(self.background_image.get_height() * entity.camera.zoomLevel))
+            )
+            # Draw the background twice for a continuous scrolling effect
+            screen.blit(scaled_background, (self.bg_x, cameraRect.y))
+            if self.bg_x < 0:
+                screen.blit(scaled_background, (self.bg_x + self.background_image.get_width(), cameraRect.y))
+
+        # Continue rendering entities after background
+        self.renderEntities(screen, entity)
 
     def check(self, entity):
         return entity.camera is not None

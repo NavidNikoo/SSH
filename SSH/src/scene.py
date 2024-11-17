@@ -62,10 +62,10 @@ class MainMenuScene(Scene):
 class LevelSelectScene(Scene):
 
     def __init__(self):
-        self.level1 = UI.ButtonUI(pygame.K_1, '[Level 1]', 50, 200)
-        self.level2 = UI.ButtonUI(pygame.K_2, '[Level 2]', 50, 300)
-        self.level3 = UI.ButtonUI(pygame.K_3, '[Level 3]', 50, 400)
-        self.esc = UI.ButtonUI(pygame.K_ESCAPE, '[Esq = quit]', 50, 400)
+        self.level1 = UI.ButtonUI(pygame.K_1, '[Level 1]', 50, 150)
+        self.level2 = UI.ButtonUI(pygame.K_2, '[Level 2]', 50, 250)
+        self.level3 = UI.ButtonUI(pygame.K_3, '[Level 3]', 50, 350)
+        self.esc = UI.ButtonUI(pygame.K_ESCAPE, '[Esq = quit]', 50, 450)
 
     def onEnter(self):
         globals.soundManager.playMusicFade('menu')
@@ -136,7 +136,7 @@ class PlayerSelectScene(Scene):
         #handle each player
         for player in [globals.player1, globals.player2, globals.player3, globals.player4]:
 
-            #add to the game : each player must use their input settings to enter
+            #add to the game : each player must use their input settings to ener
             if inputStream.keyboard.isKeyPressed(player.input.b1):
                 if player not in globals.players:
                     globals.players.append(player)
