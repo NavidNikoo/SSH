@@ -77,20 +77,24 @@ def loadLevel(levelNumber):
             winFunc=wonLevel,
             loseFunc=lostLevel
         )
+
     if levelNumber == 3:
         globals.world = Level(
             platforms=[
                 pygame.Rect(100, 300, 400, 50),
             ],
             entities=[
-                utils.makeBurger(350, 250),
-                utils.makeChicken(125, 215),
-                utils.makeSushi(400, 250),
-                globals.player1
+                utils.makeChicken(400, 50)
             ],
-            winFunc = wonLevel,
-            loseFunc = lostLevel
+            winFunc=wonLevel,
+            loseFunc=lostLevel
         )
-         #reset players
+
+
+    #add players
+    for player in globals.players:
+        globals.world.entities.append(player)
+
+    #reset players
     for entity in globals.world.entities:
         entity.reset(entity)
