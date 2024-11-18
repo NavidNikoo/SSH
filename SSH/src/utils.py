@@ -15,8 +15,6 @@ DARK_GRAY = (150, 150, 150)
 MUSTARD = (209, 206, 25)
 
 pygame.font.init()
-font = pygame.font.Font(pygame.font.get_default_font(), 24)
-
 
 def blit_alpha(target, source, location, opacity):
     x = location[0]
@@ -27,7 +25,8 @@ def blit_alpha(target, source, location, opacity):
     temp.set_alpha(opacity)
     target.blit(temp, location)
 
-def drawText(screen, t, x, y, fg, alpha):
+def drawText(screen, t, x, y, fg, alpha, font_size=24):
+    font = pygame.font.Font(pygame.font.get_default_font(), font_size)
     text = font.render(t, True, fg)
     text_rectangle = text.get_rect()
     text_rectangle.topleft = (x, y)
@@ -175,8 +174,11 @@ SamuraiRun6 = pygame.image.load('assets/samuraiRun_6.png')
 SamuraiRun7 = pygame.image.load('assets/samuraiRun_7.png')
 SamuraiRun8 = pygame.image.load('assets/samuraiRun_8.png')
 
-#Samurai
-
+SamuraiMelee1 = pygame.image.load('assets/SamuraiMelee1.png')
+SamuraiMelee2 = pygame.image.load('assets/SamuraiMelee2.png')
+SamuraiMelee3 = pygame.image.load('assets/SamuraiMelee3.png')
+SamuraiMelee4 = pygame.image.load('assets/SamuraiMelee4.png')
+SamuraiMelee5 = pygame.image.load('assets/SamuraiMelee5.png')
 
 def setPlayerCameras():
 
@@ -243,9 +245,10 @@ def makePlayer(x, y): #makeSamurai
     entity.position = engine.Position(x, y, 22, 35)
     entityIdleAnimation = engine.Animation([SamuraiIdle1, SamuraiIdle2, SamuraiIdle3, SamuraiIdle4, SamuraiIdle5])
     entityRunAnimation = engine.Animation([SamuraiRun1, SamuraiRun2, SamuraiRun3, SamuraiRun4, SamuraiRun5, SamuraiRun6, SamuraiRun7, SamuraiRun8])
-    entityAttackAnimation = engine.Animation([])
+    entityAttackAnimation = engine.Animation([SamuraiMelee1, SamuraiMelee2, SamuraiMelee3, SamuraiMelee4, SamuraiMelee5])
     entity.animations.add('idle', entityIdleAnimation)
     entity.animations.add('walking', entityRunAnimation)
+    entity.animations.add('melee', entityAttackAnimation)
     entity.health = engine.Health()
     entity.battle = engine.Battle()
     entity.intention = engine.Intention()
@@ -255,6 +258,3 @@ def makePlayer(x, y): #makeSamurai
     return entity
 
 #makeSorcerer
-
-
-

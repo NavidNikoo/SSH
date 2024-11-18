@@ -48,16 +48,15 @@ class PowerupSystem(System): #maybe make projecticle and effect
                 entity.effect = None #destroy the effect
 
 
-
-
-
 class AnimationSystem(System):
     def check(self, entity):
         return entity.animations is not None
 
     def updateEntity(self, screen, inputStream, entity):
-        entity.animations.animationList[entity.state].update()
+        # Debug current state
 
+        if entity.state in entity.animations.animationList:
+            entity.animations.animationList[entity.state].update()
 
 class PhysicsSystem(System):
     def check(self, entity):
@@ -83,6 +82,7 @@ class PhysicsSystem(System):
             if entity.intention.jump and entity.on_ground: #up if on ground
                 globals.soundManager.playSound('jump')
                 entity.speed = -5
+
 
         #horizontal movement
         new_x_rect = pygame.Rect(
@@ -141,8 +141,6 @@ class PhysicsSystem(System):
 
 
 
-
-
 class InputSystem(System):
 
     def check(self, entity):
@@ -180,15 +178,11 @@ class InputSystem(System):
         else:
             entity.intention.zoomIn = False
 
-        #b2 = zoom out
-#        if inputStream.keyboard.isKeyDown(entity.input.b3):
-#            entity.intention.melee = True
-#        else:
-#            entity.intention.melee = False
-
-
-        print(entity.intention.moveRight)
-
+        #b3 = melee
+        if inputStream.keyboard.isKeyPressed(entity.input.b3):
+            entity.intention.melee = True
+        else:
+            entity.intention.melee = False
 
 class CollectionSystem(System):
     def check(self, entity):
@@ -203,133 +197,104 @@ class CollectionSystem(System):
                     globals.world.entities.remove(otherEntity)
                     entity.health.health += 20
 
-
-
 class BattleSystem(System):
     def check(self, entity):
         return entity.type == 'player' and entity.battle is not None
 
     def updateEntity(self, screen, inputStream, entity):
+        # Handle collisions with dangerous entities (e.g., projectiles)
         for otherEntity in globals.world.entities:
-            if otherEntity is not entity and otherEntity.type == 'dangerous': #change to player to hurt each other
+            if otherEntity is not entity and otherEntity.type == 'dangerous':
                 if entity.position.rect.colliderect(otherEntity.position.rect):
-
-                    #entity.battle.onCollide(entity, otherEntity)
                     entity.battle.lives -= 1
                     entity.position.rect.x = entity.position.initial.x
                     entity.position.rect.y = entity.position.initial.y
                     entity.speed = 0
 
-                    #remove player if no lives left
                     if entity.battle.lives <= 0:
                         globals.world.entities.remove(entity)
 
-            if entity.attack_timer > 0:
-                entity.attack_timer -= globals.delta_time  # Ensure `delta_time` is in milliseconds
+        # Handle attacks
+        current_time = pygame.time.get_ticks()
 
-                # Handle melee attack
-            if entity.intention.melee and entity.attack_timer <= 0:
-                entity.is_attacking = True
-                entity.attack_timer = entity.attack_cooldown  # Reset cooldown
-
-                # Create attack hitbox
-                attack_x = entity.position.rect.x + (
-                    entity.attack_range if entity.direction == 'right' else -entity.attack_range)
-                attack_y = entity.position.rect.y
-                attack_hitbox = pygame.Rect(
-                    attack_x,
-                    attack_y,
-                    entity.attack_range,
-                    entity.position.rect.height
-                )
-
-                # Check for collisions with enemies
-                for otherEntity in globals.world.entities:
-                    if otherEntity is not entity and otherEntity.type == 'dangerous':  # Replace with appropriate type
-                        if attack_hitbox.colliderect(otherEntity.position.rect):
-                            # Apply damage to the enemy
-                            otherEntity.health.health -= entity.attack_damage
-                            print(f"Hit {otherEntity} for {entity.attack_damage} damage!")
-
-                # Reset attack state
-            if entity.is_attacking:
+        # If currently attacking, ensure state is locked to 'melee'
+        if entity.is_attacking:
+            # Wait until the animation completes before resetting state
+            if entity.intention.melee and (current_time - entity.attack_timer >= entity.attack_cooldown):
+                entity.state = 'idle'  # Return to idle state
                 entity.is_attacking = False
+            return  # Skip further processing while attacking
 
+        # Check if the player is attempting to attack
+        if entity.intention.melee and (current_time - entity.attack_timer >= entity.attack_cooldown):
+            entity.is_attacking = True
+            entity.attack_timer = current_time
+            entity.state = 'melee'  # Set state to melee for animation
 
+            # Create attack hitbox
+            attack_x = entity.position.rect.x + (
+                entity.attack_range if entity.direction == 'right' else -entity.attack_range)
+            attack_y = entity.position.rect.y
+            attack_hitbox = pygame.Rect(
+                attack_x, attack_y, entity.attack_range, entity.position.rect.height
+            )
+
+            # Debugging: Draw hitbox and log details
+            #print(f"Attack Hitbox: {attack_hitbox}")
+
+            # Check for collisions with other players
+            for otherEntity in globals.world.entities:
+                if otherEntity is not entity and otherEntity.type == 'player':  # PvP attack
+                    if attack_hitbox.colliderect(otherEntity.position.rect):
+                        # Apply damage
+                        otherEntity.health.health -= entity.attack_damage
+                        #print(f"{entity} hit {otherEntity}! Health left: {otherEntity.health.health}")
+
+                        # Apply knockback
+                        if entity.direction == 'right':
+                            otherEntity.position.rect.x += 20
+                        else:
+                            otherEntity.position.rect.x -= 20
+
+                        # Handle death
+                        if otherEntity.health.health <= 0:
+                            #print(f"{otherEntity} has been eliminated!")
+                            globals.world.entities.remove(otherEntity)
 
 class CameraSystem(System):
-    def __init__(self):
-        # Initialize necessary variables for the camera system
-        self.background_image = None  # Background image placeholder
-        self.bg_x = 0  # Horizontal position of the background
-        self.bg_speed = 1  # Background speed (you can adjust this for faster/slower scrolling)
 
-    def loadBackground(self, image_path):
-        # Load the background image for the current level
-        self.background_image = pygame.image.load(image_path)
-
-    def updateEntity(self, screen, inputStream, entity):
-        # Set the camera's clipping area
-        cameraRect = entity.camera.rect
-        clipRect = pygame.Rect(cameraRect.x, cameraRect.y, cameraRect.w, cameraRect.h)
-        screen.set_clip(clipRect)
-
-        # Scroll the background horizontally
-        self.bg_x -= self.bg_speed  # Move the background to the left
-
-        # Reset the background position once it has completely scrolled off-screen
-        if self.bg_x <= -self.background_image.get_width():
-            self.bg_x = 0
-
-        # Render the background image (scaled based on camera zoom)
-        if self.background_image:
-            scaled_background = pygame.transform.scale(
-                self.background_image, 
-                (int(self.background_image.get_width() * entity.camera.zoomLevel), 
-                 int(self.background_image.get_height() * entity.camera.zoomLevel))
-            )
-            # Draw the background twice for a continuous scrolling effect
-            screen.blit(scaled_background, (self.bg_x, cameraRect.y))
-            if self.bg_x < 0:
-                screen.blit(scaled_background, (self.bg_x + self.background_image.get_width(), cameraRect.y))
-
-        # Continue rendering entities after background
-        self.renderEntities(screen, entity)
 
     def check(self, entity):
         return entity.camera is not None
 
     def updateEntity(self, screen, inputStream, entity):
-
         if entity.intention is not None:
-            if entity.intention.zoomIn: #b1
+            if entity.intention.zoomIn:  # b1
                 entity.camera.zoomLevel += 0.01
-            if entity.intention.zoomOut: #b2
+            if entity.intention.zoomOut:  # b2
                 if entity.camera.zoomLevel > 0:
                     entity.camera.zoomLevel -= 0.01
 
-        #set clipping rectangle
+        # Set clipping rectangle
         cameraRect = entity.camera.rect
         clipRect = pygame.Rect(cameraRect.x, cameraRect.y, cameraRect.w, cameraRect.h)
         screen.set_clip(clipRect)
 
-        #update camera if tracking an entity
+        # Update camera if tracking an entity
         if entity.camera.entityToTrack is not None:
-
             trackedEntity = entity.camera.entityToTrack
-
             currentX = entity.camera.worldX
             currentY = entity.camera.worldY
 
-            targetX = trackedEntity.position.rect.x + trackedEntity.position.rect.w/2
-            targetY = trackedEntity.position.rect.y + trackedEntity.position.rect.h/2
+            targetX = trackedEntity.position.rect.x + trackedEntity.position.rect.w / 2
+            targetY = trackedEntity.position.rect.y + trackedEntity.position.rect.h / 2
 
-            entity.camera.worldX = (currentX * .98) + (targetX * 0.02)
-            entity.camera.worldY = (currentY * .98) + (targetY * 0.02)
+            entity.camera.worldX = (currentX * 0.98) + (targetX * 0.02)
+            entity.camera.worldY = (currentY * 0.98) + (targetY * 0.02)
 
-        #calculate offsets
-        offsetX = cameraRect.x + cameraRect.w/2 - (entity.camera.worldX *  entity.camera.zoomLevel)
-        offsetY = cameraRect.y + cameraRect.h/2 - (entity.camera.worldY *  entity.camera.zoomLevel)
+        # Calculate offsets
+        offsetX = cameraRect.x + cameraRect.w / 2 - (entity.camera.worldX * entity.camera.zoomLevel)
+        offsetY = cameraRect.y + cameraRect.h / 2 - (entity.camera.worldY * entity.camera.zoomLevel)
 
         #change backgrounds
       
@@ -422,14 +387,16 @@ class CameraSystem(System):
         #render platforms
         for p in globals.world.platforms:
             newPosRect = pygame.Rect(
-                (p.x *  entity.camera.zoomLevel) + offsetX,
-                (p.y *  entity.camera.zoomLevel) + offsetY,
-                p.w *  entity.camera.zoomLevel,
-                p.h *  entity.camera.zoomLevel)
+                (p.x * entity.camera.zoomLevel) + offsetX,
+                (p.y * entity.camera.zoomLevel) + offsetY,
+                p.w * entity.camera.zoomLevel,
+                p.h * entity.camera.zoomLevel,
+            )
             pygame.draw.rect(screen, globals.MUSTARD, newPosRect)
 
-        # render entities
+        # Render entities and health bars/text
         for e in globals.world.entities:
+            # Render entity animation
             s = e.state
             a = e.animations.animationList[s]
             a.draw(screen,
@@ -439,18 +406,18 @@ class CameraSystem(System):
                    False,
                    entity.camera.zoomLevel)
 
-        # entity HUD
-        # player health display
-        if entity.health is not None:
-            utils.drawText(screen, 'Health: ' + str(entity.health.health), entity.camera.rect.x + 10, entity.camera.rect.x + 50, globals.WHITE, 255)
 
-        # lives
+        # Player HUD (player-specific health and lives)
+        if entity.health is not None:
+            utils.drawText(screen, 'Health: ' + str(entity.health.health), entity.camera.rect.x + 10,
+                           entity.camera.rect.y + 50, globals.WHITE, 255)
+
         if entity.battle is not None:
             for l in range(entity.battle.lives):
                 screen.blit(utils.heart_image, (entity.camera.rect.x + 0 + (l * 25), entity.camera.rect.y + 0))
 
-
         screen.set_clip(None)
+
 
 class Camera:
     def __init__(self, x, y, w, h):
@@ -506,20 +473,21 @@ class Health: #score
     def __init__(self):
         self.health = 200
 
+
+
 class Battle:
     def __init__(self):
         self.lives = 3
 
 class Input:
-    def __init__(self, up, down, left, right, b1, b2):
+    def __init__(self, up, down, left, right, b1, b2, b3):
         self.up = up
         self.down = down
         self.left = left
         self.right = right
         self.b1 = b1 #currently zoom in and zoom out, can replace this with attacks and make b3 and b4 attacks or vice versa
         self.b2 = b2
-        #self.b3 = b3
-        #self.b3 = b3
+        self.b3 = b3
         #self.b4 = b4
 
 class Intention:
@@ -539,10 +507,8 @@ class Effect:
         self.sound = sound
         self.end = end
 
-
 def resetEntity(entity):
     pass
-
 
 class Entity:
     def __init__(self):
