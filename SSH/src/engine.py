@@ -337,7 +337,33 @@ class CameraSystem(System):
         if globals.currentLevel == 1:
             screen.blit(background1, (0,0)) #map
         if globals.currentLevel == 2:
-            screen.fill(globals.BLUE)  # map
+            background1 = pygame.image.load('assets/BG2.png')
+            bg_width, bg_height = background3.get_size()
+
+            # Calculate camera viewport dimensions
+            camera_width = entity.camera.rect.w
+            camera_height = entity.camera.rect.h
+
+            # Calculate the portion of the background to display
+            bg_x = int(entity.camera.worldX * entity.camera.zoomLevel - camera_width / 2)
+            bg_y = int(entity.camera.worldY * entity.camera.zoomLevel - camera_height / 2)
+
+            # Clamp background position to within the image bounds
+            bg_x = max(0, min(bg_x, bg_width - camera_width))
+            bg_y = max(0, min(bg_y, bg_height - camera_height))
+
+            # Create a subsurface of the background for the current camera
+            cropped_background = background3.subsurface(pygame.Rect(bg_x, bg_y, camera_width, camera_height))
+
+            # Scale the cropped background to fit the camera's zoom level
+            scaled_background = pygame.transform.scale(
+                cropped_background,
+                (int(camera_width), int(camera_height))
+            )
+
+            # Draw the scaled background on the camera's viewport
+            screen.blit(scaled_background, (entity.camera.rect.x, entity.camera.rect.y))
+
 
         #render platforms
         for p in globals.world.platforms:
