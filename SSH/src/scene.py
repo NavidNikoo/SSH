@@ -32,6 +32,8 @@ class MainMenuScene(Scene):
     def __init__(self):
         self.enter = UI.ButtonUI(pygame.K_RETURN, '[Enter = next]', 50, 200)
         self.esc = UI.ButtonUI(pygame.K_ESCAPE, '[Esq = quit]', 50, 300)
+        self.background_image = pygame.image.load('assets/mainmenu.png')
+
 
     def onEnter(self):
         globals.soundManager.playMusicFade('menu')
@@ -51,8 +53,8 @@ class MainMenuScene(Scene):
         self.esc.update(inputStream)
 
     def draw(self, sm, screen):
-        screen.fill(globals.DARK_GRAY)
-        utils.drawText(screen, 'Main Menu', 50, 50, globals.WHITE, 255)
+        screen.blit(self.background_image, (0,0))
+        utils.drawText(screen, 'Main Menu', 50, 50, globals.BLACK, 255)
         self.enter.draw(screen)
         self.esc.draw(screen)
 
@@ -183,6 +185,7 @@ class GameScene(Scene):
         self.physicsSystem = engine.PhysicsSystem()
         self.animationSystem = engine.AnimationSystem()
         self.powerupSystem = engine.PowerupSystem()
+        #self.projectileSystem = engine.ProjectileSystem()
 
     def onEnter(self):
         if globals.currentLevel == 1:

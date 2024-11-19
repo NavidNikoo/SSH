@@ -22,7 +22,6 @@ class PowerupSystem(System): #maybe make projecticle and effect
     def check(self, entity):
         return entity.effect is not None
 
-    #player collection of powerups
     def updateEntity(self, screen, inputStream, entity):
         #collection of power ups
         for otherEntity in globals.world.entities:
@@ -204,6 +203,13 @@ class InputSystem(System):
         else:
             entity.intention.melee = False
 
+        if inputStream.keyboard.isKeyPressed(entity.input.b4):
+            entity.intention.shoot = True
+        else:
+            entity.intention.shoot = False
+
+
+
 class CollectionSystem(System):
     def check(self, entity):
         return entity.type == 'player' and entity.health is not None
@@ -227,11 +233,8 @@ class BattleSystem(System):
         for otherEntity in globals.world.entities:
             if otherEntity is not entity and otherEntity.type == 'teleport':
                 if entity.position.rect.colliderect(otherEntity.position.rect):
-                    entity.health.health -= 20
-                    if entity.direction == 'right':
-                        entity.position.rect.x -= 20
-                    else:
-                        entity.position.rect.x += 20
+                    entity.position.rect.x = entity.position.initial.x  # Reset position
+                    entity.position.rect.y = entity.position.initial.y
 
         # Handle collisions with dangerous entities (e.g., projectiles)
         for otherEntity in globals.world.entities:
@@ -540,7 +543,8 @@ class Input:
         self.b1 = b1 #currently zoom in and zoom out, can replace this with attacks and make b3 and b4 attacks or vice versa
         self.b2 = b2
         self.b3 = b3
-        #self.b4 = b4
+        self.b4 = b4
+
 
 
 class Platform:
@@ -561,6 +565,7 @@ class Intention:
         self.zoomIn = False
         self.zoomOut = False
         self.melee = False
+        self.shoot = False
         #self.projectile = False
 
 class Effect:
@@ -597,3 +602,4 @@ class Entity:
         self.attack_damage = 10
         self.attack_range = 50
         self.target_pipe = None
+

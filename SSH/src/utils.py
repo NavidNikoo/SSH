@@ -48,6 +48,8 @@ def endInvisible(entity):
     if entity.animations:
         entity.animations.alpha = 255
 
+powerups = ['health', 'invisible']
+
 powerupImages =  {
     'health' : [pygame.image.load('assets/81_pizza.png')], #life reset to 3, change from pizza to something else later
     'invisible' : [pygame.image.load('assets/invisPotion.png')]
@@ -73,6 +75,21 @@ powerupEffectTimer = {
     'health' : 0,
     'invisible' : 200
 }
+
+projectile_image = pygame.image.load('assets/bullet.png')
+def makeProjectile(x, y, direction, speed=5, damage=20):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 10, 10)  # Adjust size as needed
+    entity.speed = speed
+    entity.direction = direction
+    entity.type = 'projectile'
+    entity.damage = damage
+
+    entity.animations.add('idle', engine.Animation([projectile_image]))
+
+    return entity
+
+
 
 def makePowerUp(type, x, y): #more like make effect, will eventually change food systems
     entity = engine.Entity()
@@ -240,7 +257,34 @@ def makePipeStraightUp(x, y):
     entity.animations.add('idle', entityAnimation)
     entity.type = 'design'
     return entity
+
+platform3 = pygame.image.load('assets/platform3.png')
+
+def makePinkPlatform(x, y):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 32, 32)
+
+    entityAnimation = engine.Animation([platform3])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'design'
+    return entity
+
+
+platform4 = pygame.image.load('assets/platform4.png')
+
+def makeGrayPlatform(x, y):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 32, 32)
+
+    entityAnimation = engine.Animation([platform4])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'design'
+    return entity
+
 ################################################################################################################################################
+
+
+
 
 #level select
 samuraiPlaying = pygame.image.load('assets/samuraiPlaying.png')

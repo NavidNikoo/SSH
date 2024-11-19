@@ -4,11 +4,12 @@ import utils
 import pygame
 
 class Level:
-    def __init__(self, platforms=None, entities=None, winFunc=None, loseFunc=None):
+    def __init__(self, platforms=None, entities=None, winFunc=None, loseFunc=None, powerupSpawnPoints=None):
         self.platforms = platforms
         self.entities = entities
         self.winFunc = winFunc
         self.loseFunc = loseFunc
+        self.powerUpSpawnPoints = powerupSpawnPoints
 
     def isWon(self):
         if self.winFunc is None:
@@ -58,7 +59,7 @@ def loadLevel(levelNumber):
                 engine.Platform(900, 950, 50, 400, globals.LIGHT_GRAY),
                 engine.Platform(275, 800, 10, 100, globals.BLACK), #left wall
                 engine.Platform(960, 800, 10, 100, globals.BLACK),  # right wall
-                engine.Platform(-100, 1350, 4000, 10, globals.LIGHT_GRAY),  # lowest floor
+                #engine.Platform(-100, 1350, 4000, 10, globals.LIGHT_GRAY),  # lowest floor
                 #engine.Platform(800, 950, 50, 400, globals.LIGHT_GRAY),
                 #pygame.Rect(450, 250, 50, 50)
             ],
@@ -79,11 +80,15 @@ def loadLevel(levelNumber):
                 utils.makeSpikeright(950, 845),
                 utils.makeSpikeright(950, 875),
                 utils.makeSpikeright(950, 890),
-
-                #utils.makePowerUp('invisible' ,400, 260)
+                utils.makeGrayPlatform(275, 900),
+                utils.makeGrayPlatform(275 + 176, 900),
+                utils.makeGrayPlatform(275 + (176 * 2), 900),
+                utils.makeGrayPlatform(275 + (176 * 3), 900),
+                #utils.makePowerUp('health' ,400, 260)
             ],
             winFunc=wonLevel,
             loseFunc=lostLevel,
+            #powerupSpawnPoints=[(400, 260), (300, 100)]
 
         )
 
@@ -121,11 +126,13 @@ def loadLevel(levelNumber):
                 # Tube Exit Platforms
                 engine.Platform(200, 500, 50, 20, globals.MUSTARD),  # Exit from left tube (shifted further down)
                 engine.Platform(600, 500, 50, 20, globals.MUSTARD),  # Exit from right tube (shifted further down)
-                engine.Platform(635, 470, 32, 27, globals.BROWN),  #pipe
+
 
                 engine.Platform(137, 977, 32, 27, globals.BROWN),  # straight Pipe
-                engine.Platform(130, 977, 32, 27, globals.BROWN),  # straight Pipe
+                engine.Platform(130, 977, 50, 27, globals.BROWN),  # straight Pipe
                 engine.Platform(105, 977, 30, 25, globals.BROWN),  # Pipe
+
+                engine.Platform(90, 977 , 32, 100, globals.BROWN),
 
             ],
         entities=[
@@ -136,25 +143,9 @@ def loadLevel(levelNumber):
                 utils.makePipeStraight(105, 977),
                 utils.makePipeAngled1(90, 977),
                 utils.makePipeStraightUp(90, 1000),
-                utils.makePipeStraightUp(90, 1032),
-                utils.makePipeStraightUp(90, 1064),
-                utils.makePipeStraightUp(90, 1096),
-                utils.makePipeStraightUp(90, 1128),
-                utils.makePipeStraightUp(90, 1160),
-                utils.makePipeStraightUp(90, 1192),
-                utils.makePipeStraightUp(90, (1192 + (32 * 1))),
-                utils.makePipeStraightUp(90, (1192 + (32 * 2))),
-                utils.makePipeStraightUp(90, (1192 + (32 * 3))),
-                utils.makePipeStraightUp(90, (1192 + (32 * 4))),
-                utils.makePipeStraightUp(90, (1192 + (32 * 5))),
-                utils.makePipeStraightUp(90, (1192 + (32 * 6))),
-                utils.makePipe1(640, 470), #top right pipe
-                utils.makePipeStraight(667,470),
-                utils.makePipeStraight(694, 470),
-                utils.makePipeStraight(721, 470),
-                utils.makePipeStraight(748, 470),
-                utils.makePipeStraight(775, 470),
-                utils.makePipeStraight(802, 470),
+
+
+
             ],
             winFunc=wonLevel,
             loseFunc=lostLevel,
@@ -163,10 +154,34 @@ def loadLevel(levelNumber):
     if levelNumber == 3:
         globals.world = Level(
             platforms=[
-                pygame.Rect(100, 300, 400, 50),
+                # Main platform
+                engine.Platform(275, 890, 700, 50, globals.DARK_GRAY),
+
+                # Floating Platforms
+                engine.Platform(375, 820, 150, 20, globals.PINK),  # Left floating platform
+                engine.Platform(575, 820, 150, 20, globals.PINK),  # Right floating platform
+                engine.Platform(475, 720, 150, 20, globals.PINK),  # Central floating platform
+
+                # Smaller Floating Platforms
+                engine.Platform(400, 670, 100, 15, globals.LIGHT_GRAY),  # Left small platform
+                engine.Platform(550, 670, 100, 15, globals.LIGHT_GRAY),  # Right small platform
+
+                # Intermediate Platforms
+                engine.Platform(350, 760, 100, 15, globals.LIGHT_GRAY),  # Left intermediate platform
+                engine.Platform(600, 760, 100, 15, globals.LIGHT_GRAY),  # Right intermediate platform
             ],
             entities=[
-                utils.makeChicken(400, 50)
+                # Adding collectibles for engagement
+                utils.makeChicken(400, 40),  # Adjusted collectible height
+                utils.makeTaco(475, 705),  # Adjusted to match the central platform
+                utils.makeBurger(375, 660),  # Adjusted to match the left small platform
+                utils.makeStrawberryCake(575, 660),  # Adjusted to match the right small platform
+
+                # Decorative pink platforms
+                utils.makePinkPlatform(275, 890),  # Pink platforms
+                utils.makePinkPlatform((275 + 176), 890),
+                utils.makePinkPlatform((275 + (176 * 2)), 890),
+                utils.makePinkPlatform((275 + (176 * 3)), 890)
             ],
             winFunc=wonLevel,
             loseFunc=lostLevel

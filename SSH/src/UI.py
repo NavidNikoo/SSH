@@ -26,5 +26,5 @@ class ButtonUI:
         if self.on:
             color = globals.GREEN
         else:
-            color = globals.WHITE
+            color = globals.BLACK
         utils.drawText(screen, self.text, self.x, self.y, color, alpha)

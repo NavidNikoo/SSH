@@ -13,6 +13,8 @@ BLUE = (0, 0, 255)
 LIGHT_GRAY = (200, 200, 200)
 DARK_GRAY = (150, 150, 150)
 MUSTARD = (209, 206, 25)
+PINK = (255, 192, 203)
+
 
 player1 = None
 player2 = None
