@@ -19,8 +19,10 @@ class SoundManager:
 
         }
         self.music = {
-            'game' : 'music/KleptoLindaTitles_Loopable.ogg',
-            'menu' : 'music/ChillMenu_Loopable.ogg'
+            'menu': 'music/ChillMenu_Loopable.ogg',
+            'lvl1' : 'music/KleptoLindaTitles_Loopable.ogg',
+            'lvl2' : 'music/level2.ogg',
+            'lvl3': 'music/level3.ogg'
         }
     def playSound(self, soundName):
         self.sounds[soundName].set_volume(self.soundVolume)

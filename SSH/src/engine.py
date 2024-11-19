@@ -63,10 +63,8 @@ class PhysicsSystem(System):
         return entity.position is not None
 
     def updateEntity(self, screen, inputStream, entity):
-
         new_x = entity.position.rect.x
         new_y = entity.position.rect.y
-
 
         if entity.intention is not None:
             if entity.intention.moveLeft:
@@ -79,12 +77,11 @@ class PhysicsSystem(System):
                 entity.state = 'walking'
             if not entity.intention.moveLeft and not entity.intention.moveRight:
                 entity.state = 'idle'
-            if entity.intention.jump and entity.on_ground: #up if on ground
+            if entity.intention.jump and entity.on_ground:  # Jump if on ground
                 globals.soundManager.playSound('jump')
                 entity.speed = -5
 
-
-        #horizontal movement
+        # Horizontal movement
         new_x_rect = pygame.Rect(
             int(new_x),
             int(entity.position.rect.y),
@@ -93,20 +90,22 @@ class PhysicsSystem(System):
 
         x_collision = False
 
-        #check against every platform
         for platform in globals.world.platforms:
-            if platform.colliderect(new_x_rect):
-                x_collision = True
-                break
+            if isinstance(platform, Platform):  # If it's a Platform object
+                if platform.rect.colliderect(new_x_rect):  # Use the rect for collision
+                    x_collision = True
+                    break
+            elif isinstance(platform, pygame.Rect):  # For legacy Rect platforms
+                if platform.colliderect(new_x_rect):
+                    x_collision = True
+                    break
 
-        if x_collision == False:
+        if not x_collision:
             entity.position.rect.x = new_x
 
-        #vertical movement
-
+        # Vertical movement
         entity.speed += entity.acceleration
         new_y += entity.speed
-
 
         new_y_rect = pygame.Rect(
             int(entity.position.rect.x),
@@ -117,29 +116,50 @@ class PhysicsSystem(System):
         y_collision = False
         entity.on_ground = False
 
-        #check against every platform
         for platform in globals.world.platforms:
-            if platform.colliderect(new_y_rect):
-                # set x_collision to true
-                y_collision = True
-                entity.speed = 0
-                if platform[1] > new_y: #check if the width is greater than the player
-                    entity.position.rect.y = platform[1] - entity.position.rect.height #stick player to platform
-                    entity.on_ground = True
-                break
+            if isinstance(platform, Platform):  # Check if it's a Platform object
+                if platform.rect.colliderect(new_y_rect):  # Use the rect for collision
+                    y_collision = True
+                    entity.speed = 0
+                    if platform.rect.y > new_y:  # Check if the width is greater than the player
+                        entity.position.rect.y = platform.rect.y - entity.position.rect.height  # Stick player to platform
+                        entity.on_ground = True
+                    break
+            elif isinstance(platform, pygame.Rect):  # Legacy platforms
+                if platform.colliderect(new_y_rect):
+                    y_collision = True
+                    entity.speed = 0
+                    if platform.y > new_y:
+                        entity.position.rect.y = platform.y - entity.position.rect.height
+                        entity.on_ground = True
+                    break
 
-        if y_collision == False:
+        if not y_collision:
             entity.position.rect.y = int(new_y)
 
-        #reset intentions
+        # Handle falling timer
+        if not entity.on_ground:
+            entity.fallingTimer += 1  # Increment falling timer
+
+            # Check if the entity has a `battle` component
+            if entity.battle is not None and entity.fallingTimer >= 300:  # 5 seconds at 60 FPS
+                entity.battle.lives -= 1  # Deduct a life
+                entity.health.health = 200  # Reset health
+                entity.position.rect.x = entity.position.initial.x  # Reset to initial position
+                entity.position.rect.y = entity.position.initial.y
+
+                if entity.battle.lives <= 0:  # Check if no lives are left
+                    globals.world.entities.remove(entity)  # Remove entity from the game
+                else:
+                    entity.fallingTimer = 0  # Reset falling timer
+        else:
+            entity.fallingTimer = 0  # Reset falling timer when on the ground
+
+        # Reset intentions
         if entity.intention is not None:
             entity.intention.moveLeft = False
             entity.intention.moveRight = False
             entity.intention.jump = False
-            #entity.intention. = False
-            #entity.intention. = False
-
-
 
 class InputSystem(System):
 
@@ -202,17 +222,45 @@ class BattleSystem(System):
         return entity.type == 'player' and entity.battle is not None
 
     def updateEntity(self, screen, inputStream, entity):
+
+        # Handle collisions with dangerous entities (e.g., projectiles)
+        for otherEntity in globals.world.entities:
+            if otherEntity is not entity and otherEntity.type == 'teleport':
+                if entity.position.rect.colliderect(otherEntity.position.rect):
+                    entity.health.health -= 20
+                    if entity.direction == 'right':
+                        entity.position.rect.x -= 20
+                    else:
+                        entity.position.rect.x += 20
+
         # Handle collisions with dangerous entities (e.g., projectiles)
         for otherEntity in globals.world.entities:
             if otherEntity is not entity and otherEntity.type == 'dangerous':
                 if entity.position.rect.colliderect(otherEntity.position.rect):
-                    entity.battle.lives -= 1
-                    entity.position.rect.x = entity.position.initial.x
-                    entity.position.rect.y = entity.position.initial.y
-                    entity.speed = 0
+                    entity.health.health -= 20
+                    if entity.direction == 'right':
+                        entity.position.rect.x -= 20
+                    else:
+                        entity.position.rect.x += 20
 
-                    if entity.battle.lives <= 0:
-                        globals.world.entities.remove(entity)
+        # Handle collisions with dangerous entities (e.g., projectiles)
+        for otherEntity in globals.world.entities:
+            if otherEntity is not entity and otherEntity.type == 'dangerous':
+                if entity.position.rect.colliderect(otherEntity.position.rect):
+                    entity.health.health -= 20
+                    if entity.direction == 'right':
+                        entity.position.rect.x -= 20
+                    else:
+                        entity.position.rect.x += 20
+
+                if entity.health.health <= 0:
+                    entity.battle.lives -= 1  # Decrement lives
+                    entity.health.health = 200  # Reset health for the next life (if applicable)
+                    entity.position.rect.x = entity.position.initial.x  # Reset position
+                    entity.position.rect.y = entity.position.initial.y
+
+                    if entity.battle.lives <= 0:  # Check if no lives are left
+                        globals.world.entities.remove(entity)  # Remove entity from the game
 
         # Handle attacks
         current_time = pygame.time.get_ticks()
@@ -271,7 +319,7 @@ class CameraSystem(System):
             if entity.intention.zoomIn:  # b1
                 entity.camera.zoomLevel += 0.01
             if entity.intention.zoomOut:  # b2
-                if entity.camera.zoomLevel > 0:
+                if entity.camera.zoomLevel >= 1:
                     entity.camera.zoomLevel -= 0.01
 
         # Set clipping rectangle
@@ -327,7 +375,35 @@ class CameraSystem(System):
             screen.blit(scaled_background, (entity.camera.rect.x, entity.camera.rect.y))
 
         if globals.currentLevel == 2:
-            screen.fill(globals.BLUE)  # map
+            background2 = pygame.image.load('assets/BG2.png')
+            bg_width, bg_height = background2.get_size()
+
+            # Calculate camera viewport dimensions
+            camera_width = entity.camera.rect.w
+            camera_height = entity.camera.rect.h
+
+            # Calculate the portion of the background to display
+            bg_x = int(entity.camera.worldX * entity.camera.zoomLevel - camera_width / 2)
+            bg_y = int(entity.camera.worldY * entity.camera.zoomLevel - camera_height / 2)
+
+            # Clamp background position to within the image bounds
+            bg_x = max(0, min(bg_x, bg_width - camera_width))
+            bg_y = max(0, min(bg_y, bg_height - camera_height))
+
+            # Create a subsurface of the background for the current camera
+            cropped_background = background2.subsurface(pygame.Rect(bg_x, bg_y, camera_width, camera_height))
+
+            # Scale the cropped background to fit the camera's zoom level
+            scaled_background = pygame.transform.scale(
+                cropped_background,
+                (int(camera_width), int(camera_height))
+            )
+
+            # Draw the scaled background on the camera's viewport
+            screen.blit(scaled_background, (entity.camera.rect.x, entity.camera.rect.y))
+
+            # Draw the scaled background on the camera's viewport
+            screen.blit(scaled_background, (entity.camera.rect.x, entity.camera.rect.y))
 
         if globals.currentLevel == 3:
             background3 = pygame.image.load('assets/BG3.png')
@@ -359,13 +435,18 @@ class CameraSystem(System):
 
         # Render platforms
         for p in globals.world.platforms:
-            newPosRect = pygame.Rect(
-                (p.x * entity.camera.zoomLevel) + offsetX,
-                (p.y * entity.camera.zoomLevel) + offsetY,
-                p.w * entity.camera.zoomLevel,
-                p.h * entity.camera.zoomLevel,
-            )
-            pygame.draw.rect(screen, globals.MUSTARD, newPosRect)
+            if isinstance(p, Platform):  # Check if it's a Platform object
+                # Adjust position for camera offset and zoom
+                adjusted_rect = pygame.Rect(
+                    (p.rect.x * entity.camera.zoomLevel) + offsetX,
+                    (p.rect.y * entity.camera.zoomLevel) + offsetY,
+                    p.rect.width * entity.camera.zoomLevel,
+                    p.rect.height * entity.camera.zoomLevel,
+                )
+                pygame.draw.rect(screen, p.color, adjusted_rect)
+            else:
+                # Fallback for legacy Rect platforms (if any)
+                pygame.draw.rect(screen, globals.MUSTARD, p)
 
         # Render entities and health bars/text
         for e in globals.world.entities:
@@ -446,8 +527,6 @@ class Health: #score
     def __init__(self):
         self.health = 200
 
-
-
 class Battle:
     def __init__(self):
         self.lives = 3
@@ -462,6 +541,17 @@ class Input:
         self.b2 = b2
         self.b3 = b3
         #self.b4 = b4
+
+
+class Platform:
+    def __init__(self, x, y, width, height, color):
+        self.rect = pygame.Rect(x, y, width, height)  # The geometry of the platform
+        self.color = color  # The color to draw the platform
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)  # Use the color to draw the rectangle
+
+
 
 class Intention:
     def __init__(self):
@@ -500,9 +590,10 @@ class Entity:
         self.acceleration = 0
         self.reset = resetEntity
         self.effect = None
-
+        self.fallingTimer = 0  # Timer to track how long the entity is falling
         self.is_attacking = False
         self.attack_timer = 0  # Time remaining before the next attack
         self.attack_cooldown = 500  # Cooldown time in milliseconds
         self.attack_damage = 10
         self.attack_range = 50
+        self.target_pipe = None

@@ -50,7 +50,6 @@ class MainMenuScene(Scene):
         self.enter.update(inputStream)
         self.esc.update(inputStream)
 
-
     def draw(self, sm, screen):
         screen.fill(globals.DARK_GRAY)
         utils.drawText(screen, 'Main Menu', 50, 50, globals.WHITE, 255)
@@ -69,7 +68,6 @@ class LevelSelectScene(Scene):
 
     def update(self, sm, inputStream):
         self.esc.update(inputStream)
-
 
     def input(self, sm, inputStream):
 
@@ -175,7 +173,6 @@ class PlayerSelectScene(Scene):
         else:
             screen.blit(utils.samuraiNotPlaying, (250, 100))
 
-
 class GameScene(Scene):
 
     def __init__(self):
@@ -187,10 +184,13 @@ class GameScene(Scene):
         self.animationSystem = engine.AnimationSystem()
         self.powerupSystem = engine.PowerupSystem()
 
-
-
     def onEnter(self):
-        globals.soundManager.playMusicFade('game')
+        if globals.currentLevel == 1:
+            globals.soundManager.playMusicFade('lvl1')
+        elif globals.currentLevel == 2:
+            globals.soundManager.playMusicFade('lvl2')
+        elif globals.currentLevel == 3:
+            globals.soundManager.playMusicFade('lvl3')
 
     def input(self, sm, inputStream):
 

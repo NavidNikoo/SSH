@@ -153,6 +153,95 @@ def makeEnemy(x, y):
     entity.type = 'dangerous'
     return entity
 
+################################################################################################################################################
+spike0 = pygame.image.load('assets/spikeleft.png')
+def makeSpikeleft(x, y):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 32, 32)
+
+    entityAnimation = engine.Animation([spike0])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'dangerous'
+    return entity
+
+spike1 = pygame.image.load('assets/spikeright.png')
+def makeSpikeright(x, y):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 32, 32)
+
+    entityAnimation = engine.Animation([spike1])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'dangerous'
+    return entity
+
+################################################################################################################################################
+pipe = pygame.image.load('assets/pipe.png')
+def makePipe(x, y, target_pipe=None):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 32, 32)
+    entityAnimation = engine.Animation([pipe])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'teleport'
+    entity.target_pipe = target_pipe  # Assign target pipe
+    return entity
+
+pipe1 = pygame.image.load('assets/pipe1.png')
+
+def makePipe1(x, y, target_pipe=None):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 32, 32)
+    entityAnimation = engine.Animation([pipe1])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'teleport'
+    entity.target_pipe = target_pipe  # Assign target pipe
+    return entity
+
+
+pipe90d = pygame.image.load('assets/pipeAngled.png')
+
+def makePipeAngled(x, y):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 32, 32)
+
+    entityAnimation = engine.Animation([pipe90d])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'design'
+    return entity
+
+pipe90d1 = pygame.image.load('assets/pipeAngled1.png')
+
+def makePipeAngled1(x, y):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 32, 32)
+
+    entityAnimation = engine.Animation([pipe90d1])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'design'
+    return entity
+
+pipeStraight = pygame.image.load('assets/pipeStraight.png')
+
+def makePipeStraight(x, y):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 32, 32)
+
+    entityAnimation = engine.Animation([pipeStraight])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'design'
+    return entity
+
+pipeStraightUp = pygame.image.load('assets/pipeStraightUp.png')
+
+def makePipeStraightUp(x, y):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 32, 32)
+
+    entityAnimation = engine.Animation([pipeStraightUp])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'design'
+    return entity
+################################################################################################################################################
+
 #level select
 samuraiPlaying = pygame.image.load('assets/samuraiPlaying.png')
 samuraiNotPlaying = pygame.image.load('assets/samuraiNotPlaying.png')

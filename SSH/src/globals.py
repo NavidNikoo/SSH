@@ -5,6 +5,7 @@ import soundmanager
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (127, 127, 127)
+BROWN = (150, 75, 0)  # A common shade of brown
 WHITE = (250, 250, 250)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
