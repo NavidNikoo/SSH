@@ -203,12 +203,6 @@ class InputSystem(System):
         else:
             entity.intention.melee = False
 
-        if inputStream.keyboard.isKeyPressed(entity.input.b4):
-            entity.intention.shoot = True
-        else:
-            entity.intention.shoot = False
-
-
 
 class CollectionSystem(System):
     def check(self, entity):
@@ -543,7 +537,7 @@ class Input:
         self.b1 = b1 #currently zoom in and zoom out, can replace this with attacks and make b3 and b4 attacks or vice versa
         self.b2 = b2
         self.b3 = b3
-        self.b4 = b4
+
 
 
 
