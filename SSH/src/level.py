@@ -4,12 +4,15 @@ import utils
 import pygame
 
 class Level:
-    def __init__(self, platforms=None, entities=None, winFunc=None, loseFunc=None, powerupSpawnPoints=None):
+    def __init__(self, platforms=None, entities=None, winFunc=None, loseFunc=None, powerupSpawnPoints=None, winner=None,losers=None):
         self.platforms = platforms
         self.entities = entities
         self.winFunc = winFunc
         self.loseFunc = loseFunc
         self.powerUpSpawnPoints = powerupSpawnPoints
+        self.winner = winner
+        self.losers = losers
+        self.hasStarted = False  # New flag
 
     def isWon(self):
         if self.winFunc is None:
@@ -35,13 +38,34 @@ def lostLevel(level):
 
 #Temp win status: win if all collectables(food) are collected, will eventually change to when there is one man left standing
 def wonLevel(level):
-    #level isn't won if any collectables are left
-    for entity in level.entities:
-        if entity.type == 'collectable':
-            return False
+    # Check if any collectables are left
+    collectables_remaining = any(entity.type == 'collectable' for entity in level.entities)
 
-    #otherwise level is won
-    return True
+    # Check how many players are still alive
+    alive_players = [entity for entity in level.entities if entity.type == 'player' and entity.battle.lives > 0]
+
+    # Only trigger win logic after the game has started
+    if not level.hasStarted:
+        return False
+
+    # Case 1: Single player starts game and collects all items
+    if len(alive_players) == 1 and collectables_remaining:
+        return False
+    if len(alive_players) == 1 and not collectables_remaining:
+        level.winner = alive_players[0]
+        return True
+
+    # Case 2: Multiplayer game - Win when only one player is left
+    if len(alive_players) == 1 and level.hasStarted:
+        level.winner = alive_players[0]
+        level.losers = [entity for entity in level.entities if entity.type == 'player' and entity not in alive_players]
+        return True
+
+    # No win detected
+    return False
+
+
+
 
 
 def loadLevel(levelNumber):
@@ -64,12 +88,12 @@ def loadLevel(levelNumber):
                 #pygame.Rect(450, 250, 50, 50)
             ],
             entities=[
-                utils.makeChicken(350, 250),
-                #utils.makeSushi(250, 250),
-                #utils.makeBurger(125, 200),
-                #utils.makeStrawberryCake(200, 250),
-                #utils.makeTaco(400, 250),
-                #utils.makeEnemy(150, 268),
+                utils.makeChicken(350, 880),
+                utils.makeBurger(400, 880),
+                utils.makeTaco(600, 880),
+                utils.makeStrawberryCake(700, 880),
+                utils.makeSushi(830, 880),
+                utils.makeEnemy(800, 880),
                 utils.makeSpikeleft(280, 800),
                 utils.makeSpikeleft(280, 825),
                 utils.makeSpikeleft(280, 850),
@@ -88,6 +112,7 @@ def loadLevel(levelNumber):
             ],
             winFunc=wonLevel,
             loseFunc=lostLevel,
+
             #powerupSpawnPoints=[(400, 260), (300, 100)]
 
         )
@@ -143,10 +168,11 @@ def loadLevel(levelNumber):
                 utils.makePipeStraight(105, 977),
                 utils.makePipeAngled1(90, 977),
                 utils.makePipeStraightUp(90, 1000),
+                utils.makeSushi(320, 680),
+                utils.makeBurger(500, 750),
+                utils.makeChicken(250, 650),
 
-
-
-            ],
+        ],
             winFunc=wonLevel,
             loseFunc=lostLevel,
         )
@@ -172,16 +198,20 @@ def loadLevel(levelNumber):
             ],
             entities=[
                 # Adding collectibles for engagement
-                utils.makeChicken(400, 40),  # Adjusted collectible height
+                utils.makeChicken(400, 800),  # Adjusted collectible height
                 utils.makeTaco(475, 705),  # Adjusted to match the central platform
                 utils.makeBurger(375, 660),  # Adjusted to match the left small platform
                 utils.makeStrawberryCake(575, 660),  # Adjusted to match the right small platform
+                utils.makeSushi(280, 895),
+
 
                 # Decorative pink platforms
                 utils.makePinkPlatform(275, 890),  # Pink platforms
                 utils.makePinkPlatform((275 + 176), 890),
                 utils.makePinkPlatform((275 + (176 * 2)), 890),
-                utils.makePinkPlatform((275 + (176 * 3)), 890)
+                utils.makePinkPlatform((275 + (176 * 3)), 890),
+
+                utils.makeEnemy1(800, 735)
             ],
             winFunc=wonLevel,
             loseFunc=lostLevel

@@ -170,6 +170,32 @@ def makeEnemy(x, y):
     entity.type = 'dangerous'
     return entity
 
+demon1 = pygame.image.load('assets/demon_cleave_1.png')
+demon2 = pygame.image.load('assets/demon_cleave_2.png')
+demon3 = pygame.image.load('assets/demon_cleave_3.png')
+demon4 = pygame.image.load('assets/demon_cleave_4.png')
+demon5 = pygame.image.load('assets/demon_cleave_5.png')
+demon6 = pygame.image.load('assets/demon_cleave_6.png')
+demon7 = pygame.image.load('assets/demon_cleave_7.png')
+demon8 = pygame.image.load('assets/demon_cleave_8.png')
+demon9 = pygame.image.load('assets/demon_cleave_9.png')
+demon10 = pygame.image.load('assets/demon_cleave_10.png')
+demon11 = pygame.image.load('assets/demon_cleave_11.png')
+demon12 = pygame.image.load('assets/demon_cleave_12.png')
+demon13 = pygame.image.load('assets/demon_cleave_13.png')
+demon14 = pygame.image.load('assets/demon_cleave_14.png')
+demon15 = pygame.image.load('assets/demon_cleave_15.png')
+
+
+def makeEnemy1(x, y):
+    entity = engine.Entity()
+    entity.position = engine.Position(x, y, 150, 90)
+
+    entityAnimation = engine.Animation([demon1, demon2, demon3, demon4, demon5, demon6, demon7, demon8, demon9, demon10, demon11, demon12, demon13, demon14, demon15])
+    entity.animations.add('idle', entityAnimation)
+    entity.type = 'dangerous'
+    return entity
+
 ################################################################################################################################################
 spike0 = pygame.image.load('assets/spikeleft.png')
 def makeSpikeleft(x, y):
@@ -373,8 +399,9 @@ def resetPlayer(entity):
     entity.animations.alpha = 255
     entity.effect = None
 
-def makePlayer(x, y): #makeSamurai
+def makePlayer(x, y, name): #makeSamurai
     entity = engine.Entity()
+    entity.name = name
     entity.position = engine.Position(x, y, 22, 35)
     entityIdleAnimation = engine.Animation([SamuraiIdle1, SamuraiIdle2, SamuraiIdle3, SamuraiIdle4, SamuraiIdle5])
     entityRunAnimation = engine.Animation([SamuraiRun1, SamuraiRun2, SamuraiRun3, SamuraiRun4, SamuraiRun5, SamuraiRun6, SamuraiRun7, SamuraiRun8])
@@ -390,4 +417,127 @@ def makePlayer(x, y): #makeSamurai
     entity.reset = resetPlayer
     return entity
 
-#makeSorcerer
+
+WindHashashinPlaying = pygame.image.load('assets/WindHashashinIdle1.png')
+WindHashashinNotPlaying = pygame.image.load('assets/WindHashashinNotPlaying.png')
+
+WindHashashinIdle1 = pygame.image.load('assets/WindHashashinidle1.png')
+WindHashashinIdle2 = pygame.image.load('assets/WindHashashinidle2.png')
+WindHashashinIdle3 = pygame.image.load('assets/WindHashashinidle3.png')
+WindHashashinIdle4 = pygame.image.load('assets/WindHashashinidle4.png')
+WindHashashinIdle5 = pygame.image.load('assets/WindHashashinidle5.png')
+WindHashashinIdle6 = pygame.image.load('assets/WindHashashinidle6.png')
+WindHashashinIdle7 = pygame.image.load('assets/WindHashashinidle7.png')
+WindHashashinIdle8 = pygame.image.load('assets/WindHashashinidle8.png')
+
+WindHashashinRun1 = pygame.image.load('assets/WindHashashinRun1.png')
+WindHashashinRun2 = pygame.image.load('assets/WindHashashinRun2.png')
+WindHashashinRun3 = pygame.image.load('assets/WindHashashinRun3.png')
+WindHashashinRun4 = pygame.image.load('assets/WindHashashinRun4.png')
+WindHashashinRun5 = pygame.image.load('assets/WindHashashinRun5.png')
+WindHashashinRun6 = pygame.image.load('assets/WindHashashinRun6.png')
+WindHashashinRun7 = pygame.image.load('assets/WindHashashinRun7.png')
+WindHashashinRun8 = pygame.image.load('assets/WindHashashinRun8.png')
+
+WindAttack1 = pygame.image.load('assets/WindAttack1.png')
+WindAttack2 = pygame.image.load('assets/WindAttack2.png')
+WindAttack3 = pygame.image.load('assets/WindAttack3.png')
+WindAttack4 = pygame.image.load('assets/WindAttack4.png')
+WindAttack5 = pygame.image.load('assets/WindAttack5.png')
+WindAttack6 = pygame.image.load('assets/WindAttack6.png')
+WindAttack7 = pygame.image.load('assets/WindAttack7.png')
+WindAttack8 = pygame.image.load('assets/WindAttack8.png')
+
+def makePlayer2(x, y, name): #makeSamurai
+    entity = engine.Entity()
+    entity.name = name
+    entity.position = engine.Position(x, y, 22, 35)
+    entityIdleAnimation = engine.Animation([WindHashashinIdle1, WindHashashinIdle2, WindHashashinIdle3, WindHashashinIdle4, WindHashashinIdle5, WindHashashinIdle6, WindHashashinIdle7, WindHashashinIdle8])
+    entityRunAnimation = engine.Animation([WindHashashinRun1, WindHashashinRun2, WindHashashinRun3, WindHashashinRun4, WindHashashinRun5, WindHashashinRun6, WindHashashinRun7, WindHashashinRun8])
+    entityAttackAnimation = engine.Animation([WindAttack1, WindAttack2, WindAttack3, WindAttack4, WindAttack5, WindAttack6, WindAttack7, WindAttack8])
+    entity.animations.add('idle', entityIdleAnimation)
+    entity.animations.add('walking', entityRunAnimation)
+    entity.animations.add('melee', entityAttackAnimation)
+    entity.health = engine.Health()
+    entity.battle = engine.Battle()
+    entity.intention = engine.Intention()
+    entity.acceleration = 0.2
+    entity.type = 'player'
+    entity.reset = resetPlayer
+    return entity
+
+monkPlaying = pygame.image.load('assets/monkIdle1.png')
+monkNotPlaying = pygame.image.load('assets/monkNotPlaying.png')
+
+monkIdle1 = pygame.image.load('assets/monkIdle1.png')
+monkIdle2 = pygame.image.load('assets/monkIdle2.png')
+monkIdle3 = pygame.image.load('assets/monkIdle3.png')
+monkIdle4 = pygame.image.load('assets/monkIdle4.png')
+monkIdle5 = pygame.image.load('assets/monkIdle5.png')
+monkIdle6 = pygame.image.load('assets/monkIdle6.png')
+
+monkRun1 = pygame.image.load('assets/monkRun1.png')
+monkRun2 = pygame.image.load('assets/monkRun2.png')
+monkRun3 = pygame.image.load('assets/monkRun3.png')
+monkRun4 = pygame.image.load('assets/monkRun4.png')
+monkRun5 = pygame.image.load('assets/monkRun5.png')
+monkRun6 = pygame.image.load('assets/monkRun6.png')
+monkRun7 = pygame.image.load('assets/monkRun7.png')
+monkRun8 = pygame.image.load('assets/monkRun8.png')
+
+def makePlayer3(x, y, name): #makeMonk
+    entity = engine.Entity()
+    entity.name = name
+    entity.position = engine.Position(x, y, 22, 35)
+    entityIdleAnimation = engine.Animation([monkIdle1, monkIdle2, monkIdle3, monkIdle4, monkIdle5, monkIdle6])
+    entityRunAnimation = engine.Animation([monkRun1, monkRun2, monkRun3, monkRun4, monkRun5, monkRun6, monkRun7, monkRun8])
+    entityAttackAnimation = engine.Animation([SamuraiMelee1, SamuraiMelee2, SamuraiMelee3, SamuraiMelee4, SamuraiMelee5])
+    entity.animations.add('idle', entityIdleAnimation)
+    entity.animations.add('walking', entityRunAnimation)
+    entity.animations.add('melee', entityAttackAnimation)
+    entity.health = engine.Health()
+    entity.battle = engine.Battle()
+    entity.intention = engine.Intention()
+    entity.acceleration = 0.2
+    entity.type = 'player'
+    entity.reset = resetPlayer
+    return entity
+
+RangerPlaying = pygame.image.load('assets/RangerIdle1.png')
+RangerNotPlaying = pygame.image.load('assets/RangerNotPlaying.png')
+
+RangerIdle1 = pygame.image.load('assets/RangerIdle1.png')
+RangerIdle2 = pygame.image.load('assets/RangerIdle2.png')
+RangerIdle3 = pygame.image.load('assets/RangerIdle3.png')
+RangerIdle4 = pygame.image.load('assets/RangerIdle4.png')
+RangerIdle5 = pygame.image.load('assets/RangerIdle5.png')
+RangerIdle6 = pygame.image.load('assets/RangerIdle6.png')
+RangerIdle7 = pygame.image.load('assets/RangerIdle7.png')
+RangerIdle8 = pygame.image.load('assets/RangerIdle8.png')
+
+RangerRun1 = pygame.image.load('assets/RangerRun1.png')
+RangerRun2 = pygame.image.load('assets/RangerRun2.png')
+RangerRun3 = pygame.image.load('assets/RangerRun3.png')
+RangerRun4 = pygame.image.load('assets/RangerRun4.png')
+RangerRun5 = pygame.image.load('assets/RangerRun5.png')
+RangerRun6 = pygame.image.load('assets/RangerRun6.png')
+RangerRun7 = pygame.image.load('assets/RangerRun7.png')
+RangerRun8 = pygame.image.load('assets/RangerRun8.png')
+
+def makePlayer4(x, y, name): #Make Ranger
+    entity = engine.Entity()
+    entity.name = name
+    entity.position = engine.Position(x, y, 22, 35)
+    entityIdleAnimation = engine.Animation([RangerIdle1, RangerIdle2, RangerIdle3, RangerIdle4, RangerIdle5, RangerIdle6, RangerIdle7, RangerIdle8])
+    entityRunAnimation = engine.Animation([RangerRun1, RangerRun2, RangerRun3, RangerRun4, RangerRun5, RangerRun6, RangerRun7, RangerRun8])
+    entityAttackAnimation = engine.Animation([SamuraiMelee1, SamuraiMelee2, SamuraiMelee3, SamuraiMelee4, SamuraiMelee5])
+    entity.animations.add('idle', entityIdleAnimation)
+    entity.animations.add('walking', entityRunAnimation)
+    entity.animations.add('melee', entityAttackAnimation)
+    entity.health = engine.Health()
+    entity.battle = engine.Battle()
+    entity.intention = engine.Intention()
+    entity.acceleration = 0.2
+    entity.type = 'player'
+    entity.reset = resetPlayer
+    return entity

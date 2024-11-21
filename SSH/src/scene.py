@@ -161,19 +161,19 @@ class PlayerSelectScene(Scene):
             screen.blit(utils.samuraiNotPlaying, (100, 100))
 
         if globals.player2 in globals.players:
-            screen.blit(utils.samuraiPlaying, (150, 100))
+            screen.blit(utils.WindHashashinPlaying, (150, 100))
         else:
-            screen.blit(utils.samuraiNotPlaying, (150, 100))
+            screen.blit(utils.WindHashashinNotPlaying, (150, 100))
 
         if globals.player3 in globals.players:
-            screen.blit(utils.samuraiPlaying, (200, 100))
+            screen.blit(utils.monkPlaying, (200, 100))
         else:
-            screen.blit(utils.samuraiNotPlaying, (200, 100))
+            screen.blit(utils.monkNotPlaying, (200, 100))
 
         if globals.player4 in globals.players:
-            screen.blit(utils.samuraiPlaying, (250, 100))
+            screen.blit(utils.RangerPlaying, (250, 100))
         else:
-            screen.blit(utils.samuraiNotPlaying, (250, 100))
+            screen.blit(utils.RangerNotPlaying, (250, 100))
 
 class GameScene(Scene):
 
@@ -195,19 +195,32 @@ class GameScene(Scene):
         elif globals.currentLevel == 3:
             globals.soundManager.playMusicFade('lvl3')
 
-    def input(self, sm, inputStream):
+        if not globals.world.hasStarted:
+            globals.world.hasStarted = True
+            print("Level started: True")  # Debugging confirmation
 
+        if globals.world.winner:
+            self.winner = globals.world.winner
+            self.losers = globals.world.losers
+            print(f"Winner detected on level start: {self.winner.name}")
+        else:
+            print("No winner detected on level start")
+
+    def input(self, sm, inputStream):
         if inputStream.keyboard.isKeyPressed(pygame.K_ESCAPE):
             sm.pop()
             sm.push(FadeTransitionScene([self], []))
+
         if globals.world.isWon():
-            #update the level select map
+            # Update the level select map
             nextLevel = min(globals.currentLevel + 1, globals.maxLevel)
             levelToUnlock = max(nextLevel, globals.lastCompletedLevel)
             globals.lastCompletedLevel = levelToUnlock
             globals.currentLevel = nextLevel
 
-            sm.push(WinScene())
+            # Pass the winner and losers explicitly to the WinScene
+            sm.push(WinScene(winner=globals.world.winner, losers=globals.world.losers))
+
         if globals.world.isLost():
             sm.push(LoseScene())
 
@@ -229,30 +242,48 @@ class GameScene(Scene):
 
 class WinScene(Scene):
 
-    def __init__(self):
+    def __init__(self, winner=None, losers=None):
         self.alpha = 0
-        self.esc = UI.ButtonUI(pygame.K_ESCAPE, '[Esq = quit]', 50, 200)
-
+        self.winner = winner  # The winning player
+        self.losers = losers if losers else []
+        self.esc = UI.ButtonUI(pygame.K_ESCAPE, '[Esq = quit]', 50, 300)
 
     def update(self, sm, inputStream):
         self.alpha = min(255, self.alpha + 10)
         self.esc.update(inputStream)
 
-    def input(self, sm, inputStream):
 
+
+    def input(self, sm, inputStream):
         if inputStream.keyboard.isKeyPressed(pygame.K_ESCAPE):
             globals.soundManager.playSound('button')
             sm.set([FadeTransitionScene([GameScene(), self], [MainMenuScene(), LevelSelectScene()])])
+
+    def onEnter(self):
+        globals.soundManager.playSound('win')
 
     def draw(self, sm, screen):
         if len(sm.scenes) > 1:
             sm.scenes[-2].draw(sm, screen)
 
         bgSurf = pygame.Surface((globals.SCREEN_WIDTH, globals.SCREEN_HEIGHT))
-        bgSurf.fill((globals.BLACK))
+        bgSurf.fill(globals.BLACK)
         utils.blit_alpha(screen, bgSurf, (0, 0), self.alpha * 0.7)
 
-        utils.drawText(screen, 'You win!', 50, 50, globals.WHITE, self.alpha)
+        utils.drawText(screen, 'Game Over!', 50, 30, globals.WHITE, self.alpha)
+
+        if self.winner:
+            utils.drawText(screen, f'Winner: {self.winner.name}', 50, 100, globals.GREEN, self.alpha)
+            print(f"Drawing winner: {self.winner.name}")  # Debugging output
+        else:
+            utils.drawText(screen, 'No winner detected!', 50, 100, globals.RED, self.alpha)
+            print("No winner detected while drawing WinScene")  # Debugging output
+
+        y_offset = 150
+        for loser in self.losers:
+            utils.drawText(screen, f'Loser: {loser.name}', 50, y_offset, globals.RED, self.alpha)
+            y_offset += 50
+
         self.esc.draw(screen, alpha=self.alpha)
 
 

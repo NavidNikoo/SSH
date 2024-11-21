@@ -57,6 +57,7 @@ class AnimationSystem(System):
         if entity.state in entity.animations.animationList:
             entity.animations.animationList[entity.state].update()
 
+
 class PhysicsSystem(System):
     def check(self, entity):
         return entity.position is not None
@@ -227,6 +228,7 @@ class BattleSystem(System):
         for otherEntity in globals.world.entities:
             if otherEntity is not entity and otherEntity.type == 'teleport':
                 if entity.position.rect.colliderect(otherEntity.position.rect):
+                    globals.soundManager.playSound('pipe')
                     entity.position.rect.x = entity.position.initial.x  # Reset position
                     entity.position.rect.y = entity.position.initial.y
 
@@ -234,6 +236,7 @@ class BattleSystem(System):
         for otherEntity in globals.world.entities:
             if otherEntity is not entity and otherEntity.type == 'dangerous':
                 if entity.position.rect.colliderect(otherEntity.position.rect):
+                    globals.soundManager.playSound('hurt')
                     entity.health.health -= 20
                     if entity.direction == 'right':
                         entity.position.rect.x -= 20
@@ -244,6 +247,7 @@ class BattleSystem(System):
         for otherEntity in globals.world.entities:
             if otherEntity is not entity and otherEntity.type == 'dangerous':
                 if entity.position.rect.colliderect(otherEntity.position.rect):
+                    globals.soundManager.playSound('hurt')
                     entity.health.health -= 20
                     if entity.direction == 'right':
                         entity.position.rect.x -= 20
@@ -292,6 +296,7 @@ class BattleSystem(System):
                 if otherEntity is not entity and otherEntity.type == 'player':  # PvP attack
                     if attack_hitbox.colliderect(otherEntity.position.rect):
                         # Apply damage
+                        globals.soundManager.playSound('melee')
                         otherEntity.health.health -= entity.attack_damage
                         #print(f"{entity} hit {otherEntity}! Health left: {otherEntity.health.health}")
 
@@ -372,7 +377,7 @@ class CameraSystem(System):
             screen.blit(scaled_background, (entity.camera.rect.x, entity.camera.rect.y))
 
         if globals.currentLevel == 2:
-            background2 = pygame.image.load('assets/BG2.png')
+            background2 = pygame.image.load('assets/9259351.jpg')
             bg_width, bg_height = background2.get_size()
 
             # Calculate camera viewport dimensions
@@ -538,9 +543,6 @@ class Input:
         self.b2 = b2
         self.b3 = b3
 
-
-
-
 class Platform:
     def __init__(self, x, y, width, height, color):
         self.rect = pygame.Rect(x, y, width, height)  # The geometry of the platform
@@ -596,4 +598,4 @@ class Entity:
         self.attack_damage = 10
         self.attack_range = 50
         self.target_pipe = None
-
+        self.name = None

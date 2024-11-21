@@ -15,14 +15,19 @@ class SoundManager:
             'eat': pygame.mixer.Sound('sounds/healthrefill.wav'),
             'button' : pygame.mixer.Sound('sounds/button.wav'),
             'characterselect' : pygame.mixer.Sound('sounds/characterselect.wav'),
-            'invis' : pygame.mixer.Sound('sounds/invis.wav')
+            'invis' : pygame.mixer.Sound('sounds/invis.wav'),
+            'melee' : pygame.mixer.Sound('sounds/melee.mp3'),
+            'hurt' : pygame.mixer.Sound('sounds/hurt.wav'),
+            'pipe' : pygame.mixer.Sound('sounds/pipe_down.wav'),
+            'win': pygame.mixer.Sound('music/bossclear.mp3')
 
         }
         self.music = {
             'menu': 'music/ChillMenu_Loopable.ogg',
             'lvl1' : 'music/KleptoLindaTitles_Loopable.ogg',
             'lvl2' : 'music/level2.ogg',
-            'lvl3': 'music/level3.ogg'
+            'lvl3': 'music/level3.ogg',
+
         }
     def playSound(self, soundName):
         self.sounds[soundName].set_volume(self.soundVolume)
